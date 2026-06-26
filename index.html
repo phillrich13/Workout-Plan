@@ -880,6 +880,38 @@ function updateSyncUI(status, message) {
   text.textContent = message;
 }
 
+// JSONP loader — injects a <script> tag to bypass CORS
+let _jsonpCounter = 0;
+function jsonpFetch(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = "_jsonpCb" + (++_jsonpCounter);
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("Request timed out"));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[callbackName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    const script = document.createElement("script");
+    const separator = url.includes("?") ? "&" : "?";
+    script.src = url + separator + "callback=" + callbackName;
+    script.onerror = function() {
+      cleanup();
+      reject(new Error("Script load failed"));
+    };
+    document.body.appendChild(script);
+  });
+}
+
 async function syncFromCloud() {
   const url = getScriptUrl();
   if (!url) {
@@ -890,15 +922,13 @@ async function syncFromCloud() {
   updateSyncUI("syncing", "Loading from Google Sheets...");
 
   try {
-    const resp = await fetch(url + "?action=load");
-    const json = await resp.json();
+    const json = await jsonpFetch(url + "?action=load");
 
     if (json.status === "ok" && json.data) {
       const cloudState = json.data;
       const localJson = localStorage.getItem(STORAGE_KEY);
       const localState = localJson ? JSON.parse(localJson) : null;
 
-      // Merge: use cloud data as base, keep whichever has more logged workouts
       const cloudCount = Object.keys(cloudState.logs || {}).filter(k => cloudState.logs[k]?.difficulty > 0).length;
       const localCount = localState ? Object.keys(localState.logs || {}).filter(k => localState.logs[k]?.difficulty > 0).length : 0;
 
@@ -908,13 +938,11 @@ async function syncFromCloud() {
         renderAll();
         updateSyncUI("connected", `Synced from Google Sheets (${new Date(json.lastUpdated).toLocaleString()})`);
       } else {
-        // Local has more data — push local to cloud
         updateSyncUI("connected", "Connected — local data is newer, syncing up...");
         await pushToCloud();
         renderAll();
       }
     } else if (json.status === "empty") {
-      // Cloud is empty — push local state up
       updateSyncUI("connected", "Connected — uploading local data to Google Sheets...");
       await pushToCloud();
     } else {
@@ -941,12 +969,8 @@ async function pushToCloud() {
   if (!url) return;
 
   try {
-    const resp = await fetch(url + "?action=save", {
-      method: "POST",
-      body: JSON.stringify(state),
-      headers: { "Content-Type": "text/plain" }
-    });
-    const json = await resp.json();
+    const stateStr = encodeURIComponent(JSON.stringify(state));
+    const json = await jsonpFetch(url + "?action=save&data=" + stateStr);
     if (json.status === "saved") {
       updateSyncUI("connected", `Synced — last save: ${new Date(json.timestamp).toLocaleString()}`);
     }

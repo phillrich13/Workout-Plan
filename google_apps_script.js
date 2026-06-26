@@ -18,85 +18,92 @@
 
 function doGet(e) {
   var action = e.parameter.action;
+  var callback = e.parameter.callback;
+  var result;
   
   if (action === "load") {
-    return loadState();
+    result = loadStateData();
+  } else if (action === "save" && e.parameter.data) {
+    result = saveStateFromGet(e.parameter.data);
+  } else {
+    result = { error: "Unknown action. Use ?action=load or ?action=save&data=..." };
+  }
+  
+  var jsonStr = JSON.stringify(result);
+  
+  if (callback) {
+    return ContentService
+      .createTextOutput(callback + "(" + jsonStr + ")")
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
   
   return ContentService
-    .createTextOutput(JSON.stringify({ error: "Unknown action" }))
+    .createTextOutput(jsonStr)
     .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
   var action = e.parameter.action;
+  var result;
   
   if (action === "save") {
-    return saveState(e);
+    result = saveStateFromPost(e);
+  } else {
+    result = { error: "Unknown action" };
   }
   
   return ContentService
-    .createTextOutput(JSON.stringify({ error: "Unknown action" }))
+    .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function loadState() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("State");
-  
+function getOrCreateStateSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("State");
   if (!sheet) {
-    // First time — create the State sheet with default structure
-    sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("State");
+    sheet = ss.insertSheet("State");
     sheet.getRange("A1").setValue("stateJson");
     sheet.getRange("A2").setValue("lastUpdated");
-    
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "empty", data: null }))
-      .setMimeType(ContentService.MimeType.JSON);
   }
-  
+  return sheet;
+}
+
+function loadStateData() {
+  var sheet = getOrCreateStateSheet();
   var stateJson = sheet.getRange("B1").getValue();
   var lastUpdated = sheet.getRange("B2").getValue();
   
   if (!stateJson) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "empty", data: null }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return { status: "empty", data: null };
   }
   
-  return ContentService
-    .createTextOutput(JSON.stringify({ 
-      status: "ok", 
-      data: JSON.parse(stateJson),
-      lastUpdated: lastUpdated
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return { 
+    status: "ok", 
+    data: JSON.parse(stateJson),
+    lastUpdated: lastUpdated
+  };
 }
 
-function saveState(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("State");
-  
-  if (!sheet) {
-    sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("State");
-    sheet.getRange("A1").setValue("stateJson");
-    sheet.getRange("A2").setValue("lastUpdated");
-  }
-  
-  var stateData = e.postData.contents;
-  
+function writeState(stateData) {
+  var sheet = getOrCreateStateSheet();
   sheet.getRange("B1").setValue(stateData);
   sheet.getRange("B2").setValue(new Date().toISOString());
   
-  // Also log each workout to the WorkoutLog sheet for easy viewing
   try {
     var state = JSON.parse(stateData);
     logWorkouts(state);
-  } catch(err) {
-    // Non-critical — state is still saved
-  }
+  } catch(err) {}
   
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: "saved", timestamp: new Date().toISOString() }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return { status: "saved", timestamp: new Date().toISOString() };
+}
+
+function saveStateFromPost(e) {
+  var stateData = e.postData.contents;
+  return writeState(stateData);
+}
+
+function saveStateFromGet(dataParam) {
+  return writeState(decodeURIComponent(dataParam));
 }
 
 function logWorkouts(state) {
