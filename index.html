@@ -299,53 +299,51 @@
   .log-input:focus { border-color: var(--accent); outline: none; }
   .log-input::placeholder { color: var(--text-muted); }
 
-  /* Difficulty Rating */
-  .difficulty-section {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    display: none;
+  /* Per-Exercise Difficulty Rating */
+  .ex-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
   }
-  .difficulty-section.open { display: block; }
-  .difficulty-label { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
-  .difficulty-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-  .diff-btn {
-    padding: 8px 16px;
+  .ex-rating-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .ex-rate-btn {
+    width: 28px;
+    height: 28px;
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text-muted);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    transition: all 0.2s;
-    flex: 1;
-    min-width: 80px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s;
+    padding: 0;
+    line-height: 28px;
     text-align: center;
   }
-  .diff-btn:hover { border-color: var(--accent); color: var(--text); }
-  .diff-btn.selected-1 { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-  .diff-btn.selected-2 { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-  .diff-btn.selected-3 { background: var(--yellow-dim); border-color: var(--yellow); color: var(--yellow); }
-  .diff-btn.selected-4 { background: var(--red-dim); border-color: var(--red); color: var(--red); }
-  .diff-btn.selected-5 { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+  .ex-rate-btn:hover { border-color: var(--accent); color: var(--text); }
+  .ex-rate-btn.rated-1 { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .ex-rate-btn.rated-2 { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .ex-rate-btn.rated-3 { background: var(--yellow-dim); border-color: var(--yellow); color: var(--yellow); }
+  .ex-rate-btn.rated-4 { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+  .ex-rate-btn.rated-5 { background: var(--red-dim); border-color: var(--red); color: var(--red); }
 
-  /* Adjustment Banner */
-  .adjustment-banner {
-    padding: 12px 20px;
-    border-top: 1px solid var(--border);
-    font-size: 13px;
-    display: none;
+  /* Per-Exercise Adjustment Hint */
+  .ex-adj-hint {
+    font-size: 11px;
+    margin-top: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
   }
-  .adjustment-banner.open { display: block; }
-  .adjustment-banner .adj-msg {
-    padding: 10px 14px;
-    border-radius: 8px;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .adj-up { background: var(--green-dim); color: var(--green); }
-  .adj-down { background: var(--red-dim); color: var(--red); }
-  .adj-same { background: var(--yellow-dim); color: var(--yellow); }
+  .ex-adj-hint.adj-up { background: var(--green-dim); color: var(--green); }
+  .ex-adj-hint.adj-down { background: var(--red-dim); color: var(--red); }
+  .ex-adj-hint.adj-same { background: var(--yellow-dim); color: var(--yellow); }
 
   /* Progress Tab */
   .progress-grid {
@@ -499,7 +497,7 @@
     .tabs { gap: 2px; }
     .tab { padding: 8px 10px; font-size: 12px; }
     .day-tab { padding: 8px 8px; font-size: 12px; }
-    .diff-btn { padding: 10px 8px; font-size: 12px; min-width: 60px; }
+    .ex-rate-btn { width: 32px; height: 32px; font-size: 13px; line-height: 32px; }
   }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -875,10 +873,27 @@ function getDefaultState() {
   };
 }
 
+function migrateDifficulty(st) {
+  if (!st || !st.logs) return st;
+  for (const key of Object.keys(st.logs)) {
+    const log = st.logs[key];
+    if (typeof log.difficulty === "number" && log.difficulty > 0) {
+      const dayKey = key.split("-")[1];
+      const day = PROGRAM[dayKey];
+      if (day) {
+        const obj = {};
+        for (const ex of day.exercises) obj[ex.name] = log.difficulty;
+        log.difficulty = obj;
+      }
+    }
+  }
+  return st;
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) return migrateDifficulty(JSON.parse(saved));
   } catch(e) {}
   return getDefaultState();
 }
@@ -913,11 +928,16 @@ async function syncFromCloud() {
     const cloudState = snapshot.val();
 
     if (cloudState && cloudState.logs) {
-      const cloudCount = Object.keys(cloudState.logs).filter(k => cloudState.logs[k]?.difficulty > 0).length;
-      const localCount = Object.keys(state.logs || {}).filter(k => state.logs[k]?.difficulty > 0).length;
+      const hasRatings = (log) => {
+        if (!log || !log.difficulty) return false;
+        if (typeof log.difficulty === "number") return log.difficulty > 0;
+        return typeof log.difficulty === "object" && Object.values(log.difficulty).some(v => v > 0);
+      };
+      const cloudCount = Object.keys(cloudState.logs).filter(k => hasRatings(cloudState.logs[k])).length;
+      const localCount = Object.keys(state.logs || {}).filter(k => hasRatings(state.logs[k])).length;
 
       if (cloudCount >= localCount) {
-        state = cloudState;
+        state = migrateDifficulty(cloudState);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
       } else {
@@ -969,11 +989,16 @@ if (dbRef) {
     const cloudState = snapshot.val();
     if (!cloudState || !cloudState.logs) return;
 
-    const cloudCount = Object.keys(cloudState.logs).filter(k => cloudState.logs[k]?.difficulty > 0).length;
-    const localCount = Object.keys(state.logs || {}).filter(k => state.logs[k]?.difficulty > 0).length;
+    const hasRatings = (log) => {
+      if (!log || !log.difficulty) return false;
+      if (typeof log.difficulty === "number") return log.difficulty > 0;
+      return typeof log.difficulty === "object" && Object.values(log.difficulty).some(v => v > 0);
+    };
+    const cloudCount = Object.keys(cloudState.logs).filter(k => hasRatings(cloudState.logs[k])).length;
+    const localCount = Object.keys(state.logs || {}).filter(k => hasRatings(state.logs[k])).length;
 
     if (cloudCount > localCount) {
-      state = cloudState;
+      state = migrateDifficulty(cloudState);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
       updateSyncUI("connected", "Live update received — " + new Date().toLocaleTimeString());
@@ -998,22 +1023,23 @@ function getPhaseIndex(week) {
   return Math.min(Math.ceil(week / 4), 4);
 }
 
-function getAdjustment(dayKey, week) {
+function getExerciseAdjustment(dayKey, week, exerciseName) {
   const prevKey = `W${week - 1}-${dayKey}`;
   const prevLog = state.logs[prevKey];
-  if (!prevLog || !prevLog.difficulty) return null;
+  if (!prevLog || typeof prevLog.difficulty !== "object" || !prevLog.difficulty) return null;
+  const diff = prevLog.difficulty[exerciseName];
+  if (!diff) return null;
 
-  const diff = prevLog.difficulty;
   if (diff <= 1) {
-    return { type: "up", message: "Last week felt too easy. Consider increasing weight by 5-10 lbs or adding 1-2 reps per set." };
+    return { type: "up", message: "Too easy last week — increase 5-10 lbs" };
   } else if (diff === 2) {
-    return { type: "up", message: "Good work last week. Try adding 2.5-5 lbs or 1 rep per set to keep progressing." };
+    return { type: "up", message: "Good last week — try +2.5-5 lbs" };
   } else if (diff === 3) {
-    return { type: "same", message: "Last week was right on target. Repeat the same weight/reps and focus on form quality." };
+    return { type: "same", message: "Right on target — repeat same weight" };
   } else if (diff === 4) {
-    return { type: "down", message: "Last week was tough. Keep the same weight but drop 1-2 reps per set. Focus on controlled movement." };
+    return { type: "down", message: "Tough last week — same weight, fewer reps" };
   } else {
-    return { type: "down", message: "Last week was too hard. Reduce weight by 5-10 lbs and drop reps. There's no shame in scaling back — consistency beats intensity." };
+    return { type: "down", message: "Too hard — reduce 5-10 lbs" };
   }
 }
 
@@ -1043,8 +1069,8 @@ function renderWorkouts() {
   `;
 
   for (const dk of ["A","B","C"]) {
-    const dLog = state.logs[`W${week}-${dk}`] || {};
-    const done = dLog.difficulty > 0;
+    const dkLogKey = `W${week}-${dk}`;
+    const done = isDayComplete(dkLogKey, dk);
     const active = dk === activeDay ? "active" : "";
     html += `<button class="day-tab ${active}" onclick="switchDay('${dk}')">
       <span>${dayShort[dk]}</span>
@@ -1058,9 +1084,9 @@ function renderWorkouts() {
   const day = PROGRAM[dayKey];
   const logKey = `W${week}-${dayKey}`;
   const log = state.logs[logKey] || {};
-  const isComplete = log.difficulty > 0;
-  const adjustment = getAdjustment(dayKey, week);
+  const isComplete = isDayComplete(logKey, dayKey);
   const badgeClass = day.badge === "lower" ? "badge-lower" : day.badge === "upper" ? "badge-upper" : "badge-full";
+  const diffObj = (typeof log.difficulty === "object" && log.difficulty !== null) ? log.difficulty : {};
 
   html += `<div class="day-card" style="border-top:2px solid var(--accent);">
     <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
@@ -1070,15 +1096,6 @@ function renderWorkouts() {
       </div>
       ${isComplete ? '<span style="color:var(--green);font-size:13px;">&#10003; Logged</span>' : '<span style="font-size:13px;color:var(--text-muted);">Not logged</span>'}
     </div>`;
-
-  if (adjustment) {
-    html += `<div class="adjustment-banner open">
-      <div class="adj-msg ${adjustment.type === 'up' ? 'adj-up' : adjustment.type === 'down' ? 'adj-down' : 'adj-same'}">
-        <span>${adjustment.type === 'up' ? '&#9650;' : adjustment.type === 'down' ? '&#9660;' : '&#9654;'}</span>
-        <span>${adjustment.message}</span>
-      </div>
-    </div>`;
-  }
 
   html += `<div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -1115,12 +1132,22 @@ function renderWorkouts() {
     }
 
     const startHintDesktop = (week <= 2 && ex.startWeight) ? `<div style="font-size:11px;color:var(--accent);margin-top:4px;">&#9654; Start: ${ex.startWeight}</div>` : '';
+    const exAdj = getExerciseAdjustment(dayKey, week, ex.name);
+    const adjHintDesktop = exAdj ? `<div class="ex-adj-hint adj-${exAdj.type === 'up' ? 'up' : exAdj.type === 'down' ? 'down' : 'same'}">${exAdj.type === 'up' ? '&#9650;' : exAdj.type === 'down' ? '&#9660;' : '&#9654;'} ${exAdj.message}</div>` : '';
+    const exRating = diffObj[ex.name] || 0;
+    const ratingBtns = [1,2,3,4,5].map(r => {
+      const cls = exRating === r ? `rated-${r}` : '';
+      return `<button class="ex-rate-btn ${cls}" onclick="rateExerciseDifficulty('${logKey}','${ex.name.replace(/'/g,"\\'")}',${r})">${r}</button>`;
+    }).join('');
     html += `<tr>
       <td>
         <div class="exercise-name">${ex.name}</div>
-        <div class="exercise-note">${ex.note}</div>
-        <span class="muscle-tag">${ex.muscle}</span>
         ${startHintDesktop}
+        ${adjHintDesktop}
+        <div class="ex-rating">
+          <span class="ex-rating-label">Rate:</span>
+          ${ratingBtns}
+        </div>
       </td>
       <td>${rx.sets} x ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
       <td>${weightInputs}</td>
@@ -1151,30 +1178,31 @@ function renderWorkouts() {
     }
 
     const startHintMobile = (week <= 2 && ex.startWeight) ? `<div style="font-size:12px;color:var(--accent);padding:4px 0;">&#9654; Start: ${ex.startWeight}</div>` : '';
+    const exAdjMobile = getExerciseAdjustment(dayKey, week, ex.name);
+    const adjHintMobile = exAdjMobile ? `<div class="ex-adj-hint adj-${exAdjMobile.type === 'up' ? 'up' : exAdjMobile.type === 'down' ? 'down' : 'same'}">${exAdjMobile.type === 'up' ? '&#9650;' : exAdjMobile.type === 'down' ? '&#9660;' : '&#9654;'} ${exAdjMobile.message}</div>` : '';
+    const exRatingMobile = diffObj[ex.name] || 0;
+    const ratingBtnsMobile = [1,2,3,4,5].map(r => {
+      const cls = exRatingMobile === r ? `rated-${r}` : '';
+      return `<button class="ex-rate-btn ${cls}" onclick="rateExerciseDifficulty('${logKey}','${ex.name.replace(/'/g,"\\'")}',${r})">${r}</button>`;
+    }).join('');
     html += `<div class="exercise-card">
       <div class="exercise-card-header">
         <div>
           <div class="exercise-name">${ex.name}</div>
           <span class="muscle-tag">${ex.muscle}</span>
           ${startHintMobile}
+          ${adjHintMobile}
         </div>
         <div class="exercise-card-rx">${rx.sets} &times; ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);font-weight:400;">Rest: ${rx.rest}</span></div>
       </div>
       <div class="exercise-card-inputs">${setInputs}</div>
+      <div class="ex-rating" style="padding:4px 0;">
+        <span class="ex-rating-label">Rate:</span>
+        ${ratingBtnsMobile}
+      </div>
     </div>`;
   }
-  html += `</div>
-    <div class="difficulty-section open">
-      <div class="difficulty-label">How difficult was this workout overall?</div>
-      <div class="difficulty-buttons">
-        ${[1,2,3,4,5].map(d => {
-          const labels = ["Too Easy","Moderate","Just Right","Hard","Too Hard"];
-          const selected = log.difficulty === d ? `selected-${d}` : '';
-          return `<button class="diff-btn ${selected}" onclick="rateDifficulty('${logKey}',${d},'${dayKey}')">${d} — ${labels[d-1]}</button>`;
-        }).join('')}
-      </div>
-    </div>
-  </div>`;
+  html += `</div></div>`;
 
   container.innerHTML = html;
   document.getElementById("currentWeekDisplay").textContent = week;
@@ -1195,7 +1223,7 @@ function changeWeek(delta) {
 }
 
 function logWeighIn(logKey, value) {
-  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: 0, sets: {}, date: new Date().toISOString().split('T')[0] };
+  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: {}, sets: {}, date: new Date().toISOString().split('T')[0] };
   state.logs[logKey].bodyWeight = value ? parseFloat(value) : null;
   saveStateQuiet();
   updateCurrentWeight();
@@ -1217,7 +1245,7 @@ function updateCurrentWeight() {
 }
 
 function logSet(logKey, exerciseName, setIdx, field, value) {
-  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: 0, sets: {}, date: new Date().toISOString().split('T')[0] };
+  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: {}, sets: {}, date: new Date().toISOString().split('T')[0] };
   if (!state.logs[logKey].sets[exerciseName]) state.logs[logKey].sets[exerciseName] = [];
 
   const sets = state.logs[logKey].sets[exerciseName];
@@ -1226,13 +1254,34 @@ function logSet(logKey, exerciseName, setIdx, field, value) {
   saveStateQuiet();
 }
 
-function rateDifficulty(logKey, rating, dayKey) {
-  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: 0, sets: {}, date: new Date().toISOString().split('T')[0] };
-  state.logs[logKey].difficulty = rating;
+function rateExerciseDifficulty(logKey, exerciseName, rating) {
+  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: {}, sets: {}, date: new Date().toISOString().split('T')[0] };
+  if (typeof state.logs[logKey].difficulty !== "object" || state.logs[logKey].difficulty === null) {
+    state.logs[logKey].difficulty = {};
+  }
+  state.logs[logKey].difficulty[exerciseName] = rating;
   state.logs[logKey].date = new Date().toISOString().split('T')[0];
-  saveState();
+  saveStateQuiet();
   renderWorkouts();
   renderProgress();
+}
+
+function isDayComplete(logKey, dayKey) {
+  const log = state.logs[logKey];
+  if (!log || typeof log.difficulty !== "object" || log.difficulty === null) return false;
+  const day = PROGRAM[dayKey];
+  if (!day) return false;
+  return day.exercises.every(ex => log.difficulty[ex.name] > 0);
+}
+
+function getDayAvgDifficulty(logKey, dayKey) {
+  const log = state.logs[logKey];
+  if (!log || typeof log.difficulty !== "object" || log.difficulty === null) return 0;
+  const day = PROGRAM[dayKey];
+  if (!day) return 0;
+  const ratings = day.exercises.map(ex => log.difficulty[ex.name] || 0).filter(r => r > 0);
+  if (ratings.length === 0) return 0;
+  return Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length);
 }
 
 let _saveDebounceTimer = null;
@@ -1247,22 +1296,22 @@ function renderProgress() {
   let completed = 0;
   let lastCompletedWeek = 0;
   const history = [];
+  const diffLabels = ["","Too Easy","Moderate","Just Right","Hard","Too Hard"];
+  const diffColors = ["","var(--green)","var(--green)","var(--yellow)","var(--red)","var(--red)"];
 
   for (let w = 1; w <= 16; w++) {
     for (const d of ["A","B","C"]) {
       const key = `W${w}-${d}`;
-      const log = state.logs[key];
-      if (log && log.difficulty > 0) {
+      if (isDayComplete(key, d)) {
         completed++;
         lastCompletedWeek = w;
-        const diffLabels = ["","Too Easy","Moderate","Just Right","Hard","Too Hard"];
-        const diffColors = ["","var(--green)","var(--green)","var(--yellow)","var(--red)","var(--red)"];
+        const avg = getDayAvgDifficulty(key, d);
         history.push({
           label: `Week ${w} — ${PROGRAM[d].name}`,
-          difficulty: diffLabels[log.difficulty],
-          color: diffColors[log.difficulty],
-          date: log.date || "",
-          rating: log.difficulty
+          difficulty: diffLabels[avg] || "Rated",
+          color: diffColors[avg] || "var(--text-muted)",
+          date: (state.logs[key] && state.logs[key].date) || "",
+          rating: avg
         });
       }
     }
@@ -1275,8 +1324,7 @@ function renderProgress() {
   for (let w = state.currentWeek; w >= 1; w--) {
     let weekCount = 0;
     for (const d of ["A","B","C"]) {
-      const log = state.logs[`W${w}-${d}`];
-      if (log && log.difficulty > 0) weekCount++;
+      if (isDayComplete(`W${w}-${d}`, d)) weekCount++;
     }
     if (weekCount >= 2) streak++;
     else break;
@@ -1293,12 +1341,9 @@ function renderProgress() {
     const phaseWeeks = PHASES[p-1].weeks;
     let phaseDone = 0;
     for (const w of phaseWeeks) {
-      let weekDone = 0;
       for (const d of ["A","B","C"]) {
-        const log = state.logs[`W${w}-${d}`];
-        if (log && log.difficulty > 0) weekDone++;
+        if (isDayComplete(`W${w}-${d}`, d)) phaseDone++;
       }
-      phaseDone += weekDone;
     }
     const total = phaseWeeks.length * 3;
     bar.style.width = `${Math.round((phaseDone / total) * 100)}%`;
@@ -1316,7 +1361,7 @@ function renderProgress() {
           <div>${h.label}</div>
           <div style="font-size:12px;color:var(--text-muted);">${h.date}</div>
         </div>
-        <span class="history-diff" style="background:${h.color}22;color:${h.color};">${h.difficulty}</span>
+        <span class="history-diff" style="background:${h.color}22;color:${h.color};">Avg: ${h.difficulty}</span>
       </li>
     `).join('');
   }
@@ -1329,10 +1374,10 @@ function renderGuide() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
       <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">How to Use This Program</h3>
       <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
-        This is a <strong style="color:var(--text);">16-week progressive program</strong> divided into 4 phases. Each phase automatically adjusts the number of sets, reps, and rest periods. After each workout, rate the difficulty from 1-5. The app will display personalized adjustment recommendations for the following week based on your rating.
+        This is a <strong style="color:var(--text);">16-week progressive program</strong> divided into 4 phases. Each phase automatically adjusts the number of sets, reps, and rest periods. Rate each exercise individually from 1-5 after your sets. The app will display personalized adjustment recommendations per exercise the following week.
       </p>
       <div class="highlight-box" style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:12px;">
-        <strong>The Difficulty Scale drives everything:</strong><br>
+        <strong>Rate each exercise 1-5 after your sets:</strong><br>
         <strong>1 (Too Easy)</strong> = Increase weight next week<br>
         <strong>2 (Moderate)</strong> = Small increase next week<br>
         <strong>3 (Just Right)</strong> = Repeat same weight/reps<br>
