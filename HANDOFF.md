@@ -63,16 +63,24 @@ Firebase initialization is wrapped in a try/catch. If the SDK scripts fail to lo
 | Strength | 9-12 | 3-4 | 8-10 | 75-90s |
 | Performance | 13-16 | 3-4 | 6-8 | 90s |
 
-### Adaptive Difficulty System
-After each workout, the user rates difficulty 1-5. The app displays adjustment recommendations for the next week:
-- **1 (Too Easy):** Increase weight 5-10 lbs or add 1-2 reps
-- **2 (Moderate):** Small increase (2.5-5 lbs or 1 rep)
+### Adaptive Difficulty System (Per-Exercise)
+After each exercise, the user rates difficulty 1-5 via inline buttons. Ratings are stored per-exercise in the `difficulty` object (keyed by exercise name). The app displays per-exercise adjustment recommendations the following week:
+- **1 (Too Easy):** Increase weight 5-10 lbs
+- **2 (Moderate):** Small increase (+2.5-5 lbs)
 - **3 (Just Right):** Repeat same weight/reps
 - **4 (Hard):** Same weight, fewer reps
 - **5 (Too Hard):** Reduce weight 5-10 lbs
 
+A day is "complete" when all exercises in that day have been rated. Day tab checkmarks and the Progress tab use `isDayComplete()` to check this.
+
 ### Starting Weight Guidelines
 Each exercise has a `startWeight` property. During weeks 1-2, these appear as inline hints (orange "▶ Start: X lbs") in the workout tab so the user doesn't need to flip to the guide.
+
+### Exercise Input Types
+Each exercise has an optional `inputType` field:
+- **`"weighted"` (default):** Shows weight (lbs) × reps inputs per set
+- **`"timed"`:** Shows a static dash for weight, seconds input for duration (e.g., Plank Hold)
+- **`"bodyweight"`:** Shows a static dash for weight, reps input only (e.g., Dead Bug)
 
 ---
 
@@ -83,7 +91,11 @@ Each exercise has a `startWeight` property. During weeks 1-2, these appear as in
   currentWeek: 1,          // 1-16
   logs: {
     "W1-A": {              // Key format: W{week}-{day}
-      difficulty: 3,        // 1-5 rating
+      difficulty: {         // Per-exercise ratings (object keyed by exercise name)
+        "Goblet Squat (Dumbbell)": 3,
+        "Smith Machine Romanian Deadlift": 2,
+        // ...one entry per exercise
+      },
       date: "2026-06-26",
       bodyWeight: 268,      // Optional weigh-in for that session
       sets: {
@@ -95,12 +107,18 @@ Each exercise has a `startWeight` property. During weeks 1-2, these appear as in
       }
     }
   },
-  bodyWeight: [             // Historical weigh-in array
+  bodyWeight: [             // Historical weigh-in array (sorted by date, deduplicated)
+    { date: "2026-05-19", weight: 283.6 },
+    // ... 36 seed entries from Apple Health Withings scale export ...
     { date: "2026-06-26", weight: 268.5 }
   ],
   startDate: "2026-06-26"
 }
 ```
+
+**Migration functions** (run on every `loadState` and cloud sync):
+- `migrateDifficulty()` — Converts old numeric `difficulty` (single rating per day) to per-exercise object format
+- `migrateBodyWeight()` — Merges `SEED_WEIGHTS` (36 historical weigh-ins) into `state.bodyWeight`, deduplicating by date
 
 ---
 
@@ -108,7 +126,7 @@ Each exercise has a `startWeight` property. During weeks 1-2, these appear as in
 
 ### Tabs
 1. **Workouts** — Main logging interface with day sub-tabs (Mon/Wed/Fri)
-2. **Progress** — Workout count, streak, phase progression bars, recent history
+2. **Progress** — Workout count, streak, total weight loss (with % body weight), phase progression bars, SVG weight-over-time chart, recent history
 3. **Exercise Guide** — Collapsible sections with full form instructions, warm-up/cool-down routines
 
 ### Workout Tab Details
@@ -117,12 +135,12 @@ Each exercise has a `startWeight` property. During weeks 1-2, these appear as in
 - **Weigh-in input** on every workout day
 - **Desktop layout:** Table with exercise name, prescription, weight inputs, rep inputs
 - **Mobile layout:** Card-based layout with set-by-set inputs (lbs × reps per set)
-- **Difficulty rating** buttons at the bottom of each day
+- **Per-exercise difficulty rating** buttons (1-5) inline with each exercise, with per-exercise adjustment hints
 - Desktop table and mobile cards are toggled via CSS media query at 600px breakpoint
 
 ### Profile Card
-- Starting Weight (fixed at 268.5 lbs)
-- Current Weight (most recent weigh-in from any session)
+- Starting Weight (dynamic — earliest entry in `state.bodyWeight` array)
+- Current Weight (most recent entry in `state.bodyWeight` array)
 - Current Week
 
 ### Action Bar
@@ -166,6 +184,7 @@ Each exercise object in the `PROGRAM` constant:
   muscle: "Chest, Front Delts, Triceps",
   purpose: "How this builds your physique",   // or "Why this matters for hiking"
   startWeight: "Bar only or +10-20 lbs",      // Shown weeks 1-2 only
+  inputType: "weighted",                       // "weighted" (default), "timed", or "bodyweight"
   phases: {
     1: { sets: 3, reps: "12-15", rest: "60s" },
     2: { sets: 3, reps: "10-12", rest: "75s" },
@@ -213,12 +232,34 @@ The Google Apps Script code (`google_apps_script.js`) was deleted when Firebase 
 
 ---
 
+## Weight Tracking
+
+### Historical Data
+36 weigh-ins from the user's Withings Body Smart scale (Apple Health export) are baked into the app as `SEED_WEIGHTS` (May 19 – Jun 26, 2026). These are merged into `state.bodyWeight` on every state load via `migrateBodyWeight()`.
+
+### Weight Chart
+The Progress tab includes an inline SVG line chart (`renderWeightChart()`) that:
+- Draws a responsive polyline with area fill gradient
+- Shows dot markers for each data point
+- Auto-scales Y-axis to weight range with 5 gridline ticks
+- Shows ~6 evenly-spaced X-axis date labels
+- Displays start → current summary and a delta badge (green for loss, red for gain)
+
+### Weigh-in Flow
+When the user logs a weigh-in via the Save button on any workout day:
+1. Stored in `state.logs[logKey].bodyWeight` (per-session)
+2. Also appended to `state.bodyWeight[]` (deduplicated by date)
+3. Chart re-renders, weight stats update, syncs to Firebase
+
+---
+
 ## Known Constraints
 
 1. **Planet Fitness equipment only** — No barbells, no squat racks, no power racks. Program uses Smith machines, cables, dumbbells, and plate-loaded machines only.
 2. **Firebase auth is open** — The database has public read/write rules. Acceptable for a single-user personal project but would need auth if shared.
-3. **Single-file architecture** — All ~1,550 lines live in one HTML file. If the app grows significantly, consider splitting into separate CSS/JS files.
+3. **Single-file architecture** — All ~1,790 lines live in one HTML file. If the app grows significantly, consider splitting into separate CSS/JS files.
 4. **Corporate proxy** — GitHub Pages works fine, but any backend that requires cross-origin requests to Google domains may be blocked by Zscaler on the user's work network.
+5. **Weight data source** — Historical weigh-ins were extracted from `/Users/prichardson2/Documents/apple_health_export/export.xml` (Apple Health → Withings scale records). Future imports would need the same XML parsing approach.
 
 ---
 
