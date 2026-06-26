@@ -92,6 +92,35 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
+  /* Day Sub-Tabs */
+  .day-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+  .day-tab {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .day-tab:hover { color: var(--text); background: var(--surface-2); }
+  .day-tab.active { background: var(--accent); color: #fff; }
+
   /* Week Nav */
   .week-nav {
     display: flex;
@@ -434,11 +463,12 @@
   @media (max-width: 600px) {
     .container { padding: 12px; }
     .header h1 { font-size: 22px; }
-    .profile-card { grid-template-columns: repeat(2, 1fr); }
+    .profile-card { grid-template-columns: repeat(3, 1fr); }
     .exercise-table th, .exercise-table td { padding: 8px 12px; }
     .log-input { width: 50px; }
     .tabs { gap: 2px; }
     .tab { padding: 8px 10px; font-size: 12px; }
+    .day-tab { padding: 8px 8px; font-size: 12px; }
     .schedule-grid { grid-template-columns: repeat(7, 1fr); gap: 2px; }
     .schedule-cell { padding: 6px 4px; min-height: 55px; }
   }
@@ -953,6 +983,9 @@ function renderWorkouts() {
   const phase = getPhase(week);
   const phaseIdx = getPhaseIndex(week);
 
+  // Day sub-tabs
+  const dayLabels = { A: "Day A — Lower + Core", B: "Day B — Upper Body", C: "Day C — Hybrid" };
+  const dayShort = { A: "Day A", B: "Day B", C: "Day C" };
   let html = `
     <div class="week-nav">
       <button class="week-nav-btn" onclick="changeWeek(-1)" ${week <= 1 ? 'disabled' : ''}>&#8592; Prev</button>
@@ -965,124 +998,116 @@ function renderWorkouts() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin-bottom:16px;font-size:13px;color:var(--text-muted);">
       <strong style="color:var(--text);">${phase.name} Phase:</strong> ${phase.description}
     </div>
+    <div class="day-tabs">
   `;
 
-  for (const dayKey of ["A", "B", "C"]) {
-    const day = PROGRAM[dayKey];
-    const logKey = `W${week}-${dayKey}`;
-    const log = state.logs[logKey] || {};
-    const isComplete = log.difficulty > 0;
-    const adjustment = getAdjustment(dayKey, week);
+  for (const dk of ["A","B","C"]) {
+    const dLog = state.logs[`W${week}-${dk}`] || {};
+    const done = dLog.difficulty > 0;
+    const active = dk === activeDay ? "active" : "";
+    html += `<button class="day-tab ${active}" onclick="switchDay('${dk}')">
+      <span>${dayShort[dk]}</span>
+      ${done ? '<span style="color:var(--green);font-size:12px;">&#10003;</span>' : ''}
+    </button>`;
+  }
+  html += `</div>`;
 
-    const badgeClass = day.badge === "lower" ? "badge-lower" : day.badge === "upper" ? "badge-upper" : "badge-full";
+  // Render only the active day
+  const dayKey = activeDay;
+  const day = PROGRAM[dayKey];
+  const logKey = `W${week}-${dayKey}`;
+  const log = state.logs[logKey] || {};
+  const isComplete = log.difficulty > 0;
+  const adjustment = getAdjustment(dayKey, week);
+  const badgeClass = day.badge === "lower" ? "badge-lower" : day.badge === "upper" ? "badge-upper" : "badge-full";
 
-    html += `
-      <div class="day-card">
-        <div class="day-header" onclick="toggleDay('${dayKey}')">
-          <div class="day-title">
-            <h3>${day.name}</h3>
-            <span class="day-badge ${badgeClass}">${day.badge}</span>
-          </div>
-          <div class="day-status">
-            ${isComplete ? '<span style="color:var(--green);">&#10003; Logged</span>' : '<span>Not logged</span>'}
-            <span class="chevron" id="chevron-${dayKey}">&#9654;</span>
-          </div>
-        </div>
+  html += `<div class="day-card" style="border-top:2px solid var(--accent);">
+    <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <h3 style="font-size:17px;font-weight:600;">${day.name}</h3>
+        <span class="day-badge ${badgeClass}">${day.badge}</span>
+      </div>
+      ${isComplete ? '<span style="color:var(--green);font-size:13px;">&#10003; Logged</span>' : '<span style="font-size:13px;color:var(--text-muted);">Not logged</span>'}
+    </div>`;
 
-        ${adjustment ? `
-        <div class="adjustment-banner" id="adj-${dayKey}">
-          <div class="adj-msg ${adjustment.type === 'up' ? 'adj-up' : adjustment.type === 'down' ? 'adj-down' : 'adj-same'}">
-            <span>${adjustment.type === 'up' ? '&#9650;' : adjustment.type === 'down' ? '&#9660;' : '&#9654;'}</span>
-            <span>${adjustment.message}</span>
-          </div>
-        </div>` : ''}
+  if (adjustment) {
+    html += `<div class="adjustment-banner open">
+      <div class="adj-msg ${adjustment.type === 'up' ? 'adj-up' : adjustment.type === 'down' ? 'adj-down' : 'adj-same'}">
+        <span>${adjustment.type === 'up' ? '&#9650;' : adjustment.type === 'down' ? '&#9660;' : '&#9654;'}</span>
+        <span>${adjustment.message}</span>
+      </div>
+    </div>`;
+  }
 
-        ${dayKey === "A" ? `
-        <div class="weigh-in-section" id="weighin-${dayKey}" style="display:none;padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <span style="font-size:14px;font-weight:600;">Weigh-in:</span>
-            <input type="number" class="log-input" id="weighinInput-${week}" placeholder="lbs" step="0.5" min="0"
-              style="width:80px;" value="${(log.bodyWeight || '')}"
-              onchange="logWeighIn('${logKey}', this.value)">
-            <span style="font-size:13px;color:var(--text-muted);">lbs — log your weight each Day A to track progress</span>
-          </div>
-        </div>` : ''}
+  if (dayKey === "A") {
+    html += `<div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:14px;font-weight:600;">Weigh-in:</span>
+        <input type="number" class="log-input" placeholder="lbs" step="0.5" min="0"
+          style="width:80px;" value="${(log.bodyWeight || '')}"
+          onchange="logWeighIn('${logKey}', this.value)">
+        <span style="font-size:13px;color:var(--text-muted);">lbs — log your weight each Day A</span>
+      </div>
+    </div>`;
+  }
 
-        <table class="exercise-table" id="table-${dayKey}">
-          <thead>
-            <tr>
-              <th>Exercise</th>
-              <th>Prescription</th>
-              <th>Weight (lbs)</th>
-              <th>Actual Reps</th>
-            </tr>
-          </thead>
-          <tbody>`;
+  html += `<table class="exercise-table open">
+    <thead><tr>
+      <th>Exercise</th>
+      <th>Prescription</th>
+      <th>Weight (lbs)</th>
+      <th>Actual Reps</th>
+    </tr></thead><tbody>`;
 
-    for (const ex of day.exercises) {
-      const rx = ex.phases[phaseIdx];
-      const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
+  for (const ex of day.exercises) {
+    const rx = ex.phases[phaseIdx];
+    const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
 
-      let weightInputs = '';
-      let repInputs = '';
-      for (let s = 0; s < rx.sets; s++) {
-        const sv = savedSets[s] || {};
-        weightInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.weight || ''}" 
-          onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">`;
-        repInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.reps || ''}" 
-          onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
-        if (s < rx.sets - 1) {
-          weightInputs += ' ';
-          repInputs += ' ';
-        }
-      }
-
-      html += `
-            <tr>
-              <td>
-                <div class="exercise-name">${ex.name}</div>
-                <div class="exercise-note">${ex.note}</div>
-                <span class="muscle-tag">${ex.muscle}</span>
-              </td>
-              <td>${rx.sets} x ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
-              <td>${weightInputs}</td>
-              <td>${repInputs}</td>
-            </tr>`;
+    let weightInputs = '';
+    let repInputs = '';
+    for (let s = 0; s < rx.sets; s++) {
+      const sv = savedSets[s] || {};
+      weightInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.weight || ''}" 
+        onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">`;
+      repInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.reps || ''}" 
+        onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
+      if (s < rx.sets - 1) { weightInputs += ' '; repInputs += ' '; }
     }
 
-    html += `
-          </tbody>
-        </table>
-        <div class="difficulty-section" id="diff-${dayKey}">
-          <div class="difficulty-label">How difficult was this workout overall?</div>
-          <div class="difficulty-buttons">
-            ${[1,2,3,4,5].map(d => {
-              const labels = ["Too Easy","Moderate","Just Right","Hard","Too Hard"];
-              const selected = log.difficulty === d ? `selected-${d}` : '';
-              return `<button class="diff-btn ${selected}" onclick="rateDifficulty('${logKey}',${d},'${dayKey}')">${d} — ${labels[d-1]}</button>`;
-            }).join('')}
-          </div>
-        </div>
-      </div>`;
+    html += `<tr>
+      <td>
+        <div class="exercise-name">${ex.name}</div>
+        <div class="exercise-note">${ex.note}</div>
+        <span class="muscle-tag">${ex.muscle}</span>
+      </td>
+      <td>${rx.sets} x ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
+      <td>${weightInputs}</td>
+      <td>${repInputs}</td>
+    </tr>`;
   }
+
+  html += `</tbody></table>
+    <div class="difficulty-section open">
+      <div class="difficulty-label">How difficult was this workout overall?</div>
+      <div class="difficulty-buttons">
+        ${[1,2,3,4,5].map(d => {
+          const labels = ["Too Easy","Moderate","Just Right","Hard","Too Hard"];
+          const selected = log.difficulty === d ? `selected-${d}` : '';
+          return `<button class="diff-btn ${selected}" onclick="rateDifficulty('${logKey}',${d},'${dayKey}')">${d} — ${labels[d-1]}</button>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
 
   container.innerHTML = html;
   document.getElementById("currentWeekDisplay").textContent = week;
   updateCurrentWeight();
 }
 
-function toggleDay(dayKey) {
-  const table = document.getElementById(`table-${dayKey}`);
-  const diff = document.getElementById(`diff-${dayKey}`);
-  const adj = document.getElementById(`adj-${dayKey}`);
-  const chevron = document.getElementById(`chevron-${dayKey}`);
-  const weighin = document.getElementById(`weighin-${dayKey}`);
-
-  table.classList.toggle('open');
-  diff.classList.toggle('open');
-  if (adj) adj.classList.toggle('open');
-  if (weighin) weighin.style.display = table.classList.contains('open') ? 'block' : 'none';
-  chevron.classList.toggle('open');
+let activeDay = "A";
+function switchDay(dayKey) {
+  activeDay = dayKey;
+  renderWorkouts();
 }
 
 function changeWeek(delta) {
