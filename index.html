@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strength Training Plan — Phillip Richardson</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #242736;
+    --border: #2e3244;
+    --text: #e4e6f0;
+    --text-muted: #8b8fa3;
+    --accent: #F88A42;
+    --accent-dim: rgba(248,138,66,0.15);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.15);
+    --yellow: #facc15;
+    --yellow-dim: rgba(250,204,21,0.15);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.15);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.15);
+    --purple: #a78bfa;
+    --radius: 10px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 30px 0 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .header p { color: var(--text-muted); font-size: 14px; }
+
+  /* Profile Card */
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+  .profile-stat { text-align: center; }
+  .profile-stat .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+  .profile-stat .value { font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); background: var(--surface-2); }
+  .tab.active { background: var(--accent); color: #fff; }
+
+  /* Tab Content */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Week Nav */
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+  }
+  .week-nav h2 { font-size: 20px; font-weight: 600; }
+  .week-nav-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .week-nav-btn:hover { background: var(--accent); border-color: var(--accent); }
+  .week-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Workout Day Card */
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .day-header:hover { background: var(--surface-2); }
+  .day-title { display: flex; align-items: center; gap: 12px; }
+  .day-title h3 { font-size: 17px; font-weight: 600; }
+  .day-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-lower { background: var(--blue-dim); color: var(--blue); }
+  .badge-upper { background: var(--purple); background: rgba(167,139,250,0.15); color: var(--purple); }
+  .badge-full { background: var(--accent-dim); color: var(--accent); }
+  .day-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+  .chevron { transition: transform 0.2s; font-size: 18px; }
+  .chevron.open { transform: rotate(90deg); }
+
+  /* Exercise Table */
+  .exercise-table {
+    width: 100%;
+    border-collapse: collapse;
+    display: none;
+  }
+  .exercise-table.open { display: table; }
+  .exercise-table th {
+    text-align: left;
+    padding: 10px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .exercise-table td {
+    padding: 12px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .exercise-table tr:last-child td { border-bottom: none; }
+  .exercise-name { font-weight: 600; }
+  .exercise-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .muscle-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  /* Input Styles */
+  .log-input {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    width: 60px;
+    font-size: 13px;
+    text-align: center;
+  }
+  .log-input:focus { border-color: var(--accent); outline: none; }
+  .log-input::placeholder { color: var(--text-muted); }
+
+  /* Difficulty Rating */
+  .difficulty-section {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .difficulty-section.open { display: block; }
+  .difficulty-label { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .difficulty-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+  .diff-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+  .diff-btn:hover { border-color: var(--accent); color: var(--text); }
+  .diff-btn.selected-1 { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .diff-btn.selected-2 { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .diff-btn.selected-3 { background: var(--yellow-dim); border-color: var(--yellow); color: var(--yellow); }
+  .diff-btn.selected-4 { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+  .diff-btn.selected-5 { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+  /* Adjustment Banner */
+  .adjustment-banner {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    display: none;
+  }
+  .adjustment-banner.open { display: block; }
+  .adjustment-banner .adj-msg {
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .adj-up { background: var(--green-dim); color: var(--green); }
+  .adj-down { background: var(--red-dim); color: var(--red); }
+  .adj-same { background: var(--yellow-dim); color: var(--yellow); }
+
+  /* Progress Tab */
+  .progress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .progress-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+  .streak-number { font-size: 48px; font-weight: 700; color: var(--accent); }
+  .streak-label { font-size: 13px; color: var(--text-muted); }
+
+  /* History List */
+  .history-list { list-style: none; }
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-diff {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Guide Tab */
+  .guide-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .guide-header {
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .guide-header:hover { background: var(--surface-2); }
+  .guide-header h3 { font-size: 16px; font-weight: 600; }
+  .guide-body {
+    padding: 0 20px 20px;
+    display: none;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+  .guide-body.open { display: block; }
+  .guide-body ul { padding-left: 20px; margin: 8px 0; }
+  .guide-body li { margin-bottom: 4px; }
+  .guide-body strong { color: var(--text); }
+  .guide-body .highlight-box {
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+    color: var(--text);
+  }
+
+  /* Schedule Tab */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+  .schedule-day-header {
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 8px 4px;
+  }
+  .schedule-cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    min-height: 70px;
+    font-size: 12px;
+  }
+  .schedule-cell.rest { opacity: 0.5; }
+  .schedule-cell.strength { border-color: var(--accent); background: var(--accent-dim); }
+  .schedule-cell.walk { border-color: var(--green); background: var(--green-dim); }
+  .schedule-cell.hike { border-color: var(--blue); background: var(--blue-dim); }
+  .schedule-cell .cell-label { font-weight: 600; margin-top: 4px; font-size: 11px; }
+  .schedule-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Sync Status */
+  .sync-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .sync-dot.connected { background: var(--green); }
+  .sync-dot.offline { background: var(--yellow); }
+  .sync-dot.error { background: var(--red); }
+  .sync-dot.syncing { background: var(--blue); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  /* Save/Reset buttons */
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger { background: transparent; color: var(--red); border-color: var(--red); }
+  .btn-danger:hover { background: var(--red-dim); }
+  .btn-secondary { background: var(--surface-2); color: var(--text); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-sync { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+  .btn-sync:hover { opacity: 0.9; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container { padding: 12px; }
+    .header h1 { font-size: 22px; }
+    .profile-card { grid-template-columns: repeat(2, 1fr); }
+    .exercise-table th, .exercise-table td { padding: 8px 12px; }
+    .log-input { width: 50px; }
+    .tabs { gap: 2px; }
+    .tab { padding: 8px 10px; font-size: 12px; }
+    .schedule-grid { grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .schedule-cell { padding: 6px 4px; min-height: 55px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Strength Training Plan</h1>
+    <p>3 days/week &middot; ~45 min sessions &middot; Planet Fitness &middot; Adaptive progression</p>
+  </div>
+
+  <div class="profile-card">
+    <div class="profile-stat">
+      <div class="label">Height</div>
+      <div class="value">5'10"</div>
+    </div>
+    <div class="profile-stat">
+      <div class="label">Starting Weight</div>
+      <div class="value">268.5 lbs</div>
+    </div>
+    <div class="profile-stat">
+      <div class="label">Primary Goal</div>
+      <div class="value" style="font-size:15px;">Hiking Strength</div>
+    </div>
+    <div class="profile-stat">
+      <div class="label">Secondary Goal</div>
+      <div class="value" style="font-size:15px;">Upper Body</div>
+    </div>
+    <div class="profile-stat">
+      <div class="label">Current Week</div>
+      <div class="value" id="currentWeekDisplay">1</div>
+    </div>
+  </div>
+
+  <!-- Sync Status -->
+  <div class="sync-bar" id="syncBar">
+    <span class="sync-dot offline" id="syncDot"></span>
+    <span id="syncStatus">Connecting to Google Sheets...</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="workouts">Workouts</button>
+    <button class="tab" data-tab="schedule">Weekly Schedule</button>
+    <button class="tab" data-tab="progress">Progress</button>
+    <button class="tab" data-tab="guide">Exercise Guide</button>
+  </div>
+
+  <!-- WORKOUTS TAB -->
+  <div class="tab-content active" id="tab-workouts"></div>
+
+  <!-- SCHEDULE TAB -->
+  <div class="tab-content" id="tab-schedule">
+    <div class="schedule-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Strength</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Walk</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Hike</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div> Rest</div>
+    </div>
+    <div id="scheduleContent"></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;">
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:12px;">Recommended Weekly Layout</h3>
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
+        The plan alternates strength and walking days to allow recovery. Strength days are placed on <strong style="color:var(--text)">Monday, Wednesday, and Friday</strong> so your legs recover in between for walking. Saturday remains your long hike day. Sunday is full rest.
+      </p>
+      <div style="margin-top:16px;">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 0;font-weight:600;">Monday</td>
+            <td style="padding:8px 0;color:var(--accent);">Day A — Lower Body + Core</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 0;font-weight:600;">Tuesday</td>
+            <td style="padding:8px 0;color:var(--green);">Walk 3-4 mi</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 0;font-weight:600;">Wednesday</td>
+            <td style="padding:8px 0;color:var(--accent);">Day B — Upper Body Push + Pull</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 0;font-weight:600;">Thursday</td>
+            <td style="padding:8px 0;color:var(--green);">Walk 3-4 mi</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 0;font-weight:600;">Friday</td>
+            <td style="padding:8px 0;color:var(--accent);">Day C — Lower Power + Upper Accessories</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 0;font-weight:600;">Saturday</td>
+            <td style="padding:8px 0;color:var(--blue);">Hike 4-8 mi</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;font-weight:600;">Sunday</td>
+            <td style="padding:8px 0;color:var(--text-muted);">Full Rest / Light Stretch</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TAB -->
+  <div class="tab-content" id="tab-progress">
+    <div class="progress-grid">
+      <div class="progress-card">
+        <h3>Workouts Completed</h3>
+        <div class="streak-number" id="totalWorkouts">0</div>
+        <div class="streak-label">total sessions logged</div>
+      </div>
+      <div class="progress-card">
+        <h3>Current Streak</h3>
+        <div class="streak-number" id="currentStreak">0</div>
+        <div class="streak-label">consecutive weeks</div>
+      </div>
+      <div class="progress-card">
+        <h3>Current Phase</h3>
+        <div class="streak-number" id="currentPhase" style="font-size:24px;">Foundation</div>
+        <div class="streak-label" id="phaseWeeks">Weeks 1-4</div>
+      </div>
+    </div>
+    <div class="progress-card" style="margin-bottom:16px;">
+      <h3>Recent Workout History</h3>
+      <ul class="history-list" id="historyList">
+        <li class="history-item" style="color:var(--text-muted);">No workouts logged yet. Complete your first session!</li>
+      </ul>
+    </div>
+    <div class="progress-card">
+      <h3>Phase Progression</h3>
+      <div style="margin-top:12px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:120px;font-size:13px;font-weight:600;">Foundation</div>
+          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
+            <div id="phase1Bar" style="height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width 0.5s;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);">Wk 1-4</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:120px;font-size:13px;font-weight:600;">Building</div>
+          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
+            <div id="phase2Bar" style="height:100%;background:var(--blue);border-radius:4px;width:0%;transition:width 0.5s;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);">Wk 5-8</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:120px;font-size:13px;font-weight:600;">Strength</div>
+          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
+            <div id="phase3Bar" style="height:100%;background:var(--green);border-radius:4px;width:0%;transition:width 0.5s;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);">Wk 9-12</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:120px;font-size:13px;font-weight:600;">Performance</div>
+          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
+            <div id="phase4Bar" style="height:100%;background:var(--purple);border-radius:4px;width:0%;transition:width 0.5s;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);">Wk 13-16</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIDE TAB -->
+  <div class="tab-content" id="tab-guide"></div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <button class="btn btn-sync" onclick="manualSync()">Sync Now</button>
+    <button class="btn btn-secondary" onclick="exportData()">Export JSON</button>
+    <button class="btn btn-secondary" onclick="importData()">Import JSON</button>
+    <button class="btn btn-danger" onclick="resetAll()">Reset All Data</button>
+  </div>
+  <div style="text-align:center;margin-bottom:16px;">
+    <details style="display:inline-block;text-align:left;">
+      <summary style="font-size:12px;color:var(--text-muted);cursor:pointer;">Google Sheets Setup</summary>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:8px;max-width:600px;font-size:13px;color:var(--text-muted);line-height:1.8;">
+        <p>To enable cross-device sync:</p>
+        <ol style="padding-left:20px;">
+          <li>Open your <a href="https://docs.google.com/spreadsheets/d/1ofvUHiTohMHF8hlf3KV4eu8t1ei0NAstAPpiP9QbQ9E/edit" target="_blank" style="color:var(--accent);">Google Sheet</a></li>
+          <li>Go to <strong style="color:var(--text);">Extensions > Apps Script</strong></li>
+          <li>Paste the Apps Script code (in your <code>google_apps_script.js</code> file)</li>
+          <li>Click <strong style="color:var(--text);">Deploy > New deployment > Web app</strong></li>
+          <li>Set "Execute as" = <strong style="color:var(--text);">Me</strong>, "Who has access" = <strong style="color:var(--text);">Anyone</strong></li>
+          <li>Copy the Web App URL and paste it below</li>
+        </ol>
+        <div style="margin-top:12px;">
+          <label style="font-size:12px;text-transform:uppercase;letter-spacing:1px;">Apps Script URL:</label><br>
+          <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" 
+            style="width:100%;padding:8px 12px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;margin-top:4px;"
+            value="">
+          <button class="btn btn-primary" style="margin-top:8px;padding:6px 16px;font-size:12px;" onclick="saveScriptUrl()">Save & Connect</button>
+        </div>
+      </div>
+    </details>
+  </div>
+  <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== PROGRAM DEFINITION ==========
+const PHASES = [
+  { name: "Foundation", weeks: [1,2,3,4], description: "Build movement patterns, joint conditioning, and baseline strength. Light weights, higher reps, focus on form." },
+  { name: "Building", weeks: [5,6,7,8], description: "Increase load gradually. Moderate weight, moderate reps. Movements become more compound." },
+  { name: "Strength", weeks: [9,10,11,12], description: "Heavier loads, lower rep ranges. Focus on progressive overload and strength gains." },
+  { name: "Performance", weeks: [13,14,15,16], description: "Peak intensity with hiking-specific power work. Prepare for harder trails." }
+];
+
+// Planet Fitness equipment: machines, dumbbells (up to 75lb), Smith machine, cables, bodyweight
+const PROGRAM = {
+  // DAY A: Lower Body + Core (hiking priority)
+  A: {
+    name: "Day A — Lower Body + Core",
+    badge: "lower",
+    exercises: [
+      {
+        name: "Goblet Squat (Dumbbell)",
+        muscle: "Quads, Glutes",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
+        note: "Hold one dumbbell at chest height. Sit back and down, keeping chest tall. Key lift for steep uphill power.",
+        guide: "Stand shoulder-width apart, hold a dumbbell vertically against your chest with both hands. Push hips back, bend knees, lower until thighs are at least parallel. Drive through heels to stand. Keep your torso upright throughout."
+      },
+      {
+        name: "Smith Machine Romanian Deadlift",
+        muscle: "Hamstrings, Glutes, Lower Back",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
+        note: "Slight knee bend, hinge at hips, feel stretch in hamstrings. Critical for downhill control on trails.",
+        guide: "Stand in the Smith machine with feet hip-width apart. Unhook the bar at hip height. With a slight bend in your knees (keep them fixed), hinge at the hips pushing your butt back. Lower the bar along your thighs until you feel a deep hamstring stretch (mid-shin area). Squeeze glutes to return to standing."
+      },
+      {
+        name: "Leg Press Machine",
+        muscle: "Quads, Glutes",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
+        note: "Feet high and wide on platform for more glute/hamstring emphasis (hiking muscles).",
+        guide: "Sit in the leg press, place feet shoulder-width apart and HIGH on the platform (this targets glutes/hams more). Lower the weight until knees form ~90 degrees. Press through your heels to extend. Don't lock knees at the top."
+      },
+      {
+        name: "Dumbbell Walking Lunges",
+        muscle: "Quads, Glutes, Balance",
+        phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
+        note: "Directly mimics uphill stepping. Keep torso upright, long stride.",
+        guide: "Hold dumbbells at your sides. Take a big step forward, lower your back knee toward the floor until both knees form ~90 degree angles. Push off your front foot to step forward into the next lunge. Alternate legs. Keep your torso upright and core tight."
+      },
+      {
+        name: "Standing Calf Raises (Smith Machine)",
+        muscle: "Calves",
+        phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"15-20",rest:"45s"},3:{sets:4,reps:"12-15",rest:"45s"},4:{sets:4,reps:"12-15",rest:"45s"}},
+        note: "Use a step or plate for full range of motion. Calves are critical for steep inclines.",
+        guide: "Place the bar across your shoulders in the Smith machine. Stand on a step or plate with just the balls of your feet. Lower heels below the step for a full stretch, then rise up onto your toes as high as possible. Pause at the top for 1 second."
+      },
+      {
+        name: "Cable Woodchops",
+        muscle: "Core, Obliques",
+        phases: {1:{sets:2,reps:"12 each side",rest:"45s"},2:{sets:3,reps:"12 each side",rest:"45s"},3:{sets:3,reps:"10 each side",rest:"60s"},4:{sets:3,reps:"10 each side",rest:"60s"}},
+        note: "Rotational core strength helps with trail balance on uneven terrain.",
+        guide: "Set cable at highest position. Stand sideways to the machine, grab handle with both hands. Pull the cable diagonally across your body from high to low, rotating your torso. Control the weight back up. Keep arms relatively straight — the rotation comes from your core, not your arms."
+      },
+      {
+        name: "Plank Hold",
+        muscle: "Core",
+        phases: {1:{sets:2,reps:"20-30 sec",rest:"45s"},2:{sets:3,reps:"30-45 sec",rest:"45s"},3:{sets:3,reps:"45-60 sec",rest:"45s"},4:{sets:3,reps:"60 sec",rest:"45s"}},
+        note: "Foundation core stability. Squeeze glutes, don't let hips sag.",
+        guide: "Get on your forearms and toes, body in a straight line from head to heels. Squeeze your glutes, brace your abs as if someone is about to punch your stomach, and hold. Don't let your hips sag or pike up. Breathe steadily."
+      }
+    ]
+  },
+  // DAY B: Upper Body Push + Pull (aesthetics focus)
+  B: {
+    name: "Day B — Upper Body Push + Pull",
+    badge: "upper",
+    exercises: [
+      {
+        name: "Smith Machine Bench Press",
+        muscle: "Chest, Front Delts, Triceps",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
+        note: "Primary chest builder. Grip slightly wider than shoulders. Control the descent.",
+        guide: "Lie on the bench under the Smith machine. Grip the bar slightly wider than shoulder-width. Unhook and lower the bar to mid-chest with control (2-3 seconds down). Press up explosively. The Smith machine guides the bar path, so focus on squeezing your chest at the top."
+      },
+      {
+        name: "Seated Cable Row",
+        muscle: "Mid Back, Lats, Biceps",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
+        note: "Squeeze shoulder blades together at the end of each rep. Builds posture and back width.",
+        guide: "Sit at the cable row station with feet on the platform, slight bend in knees. Grab the handle, sit tall with chest up. Pull the handle to your lower chest/upper abdomen, squeezing your shoulder blades together hard at the end. Slowly return to the start with arms extended. Don't round your back."
+      },
+      {
+        name: "Dumbbell Overhead Press (Seated)",
+        muscle: "Shoulders, Triceps",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
+        note: "Seated for back support. Press to full lockout. Builds the capped shoulder look.",
+        guide: "Sit on a bench with back support set to ~85 degrees (almost vertical). Hold dumbbells at shoulder height, palms facing forward. Press them up until arms are fully extended overhead. Lower back to shoulder height with control. Don't arch your lower back excessively."
+      },
+      {
+        name: "Lat Pulldown Machine",
+        muscle: "Lats, Upper Back, Biceps",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
+        note: "Wide grip for V-taper. Pull to upper chest, lean back slightly.",
+        guide: "Sit at the lat pulldown, grip the bar wider than shoulder-width. Lean back slightly (~15 degrees), pull the bar down to your upper chest, driving your elbows down and back. Squeeze your lats at the bottom. Control the weight back up — don't let it yank you."
+      },
+      {
+        name: "Dumbbell Incline Press",
+        muscle: "Upper Chest, Shoulders",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"75s"},4:{sets:3,reps:"8-10",rest:"75s"}},
+        note: "Set bench to 30-45 degrees. Builds upper chest fullness.",
+        guide: "Set an adjustable bench to 30-45 degrees. Lie back with dumbbells at chest level, palms forward. Press the dumbbells up and slightly toward each other (without clanking). Lower slowly until you feel a stretch across your upper chest."
+      },
+      {
+        name: "Cable Face Pulls",
+        muscle: "Rear Delts, Rotator Cuff",
+        phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"12-15",rest:"45s"},4:{sets:3,reps:"12-15",rest:"45s"}},
+        note: "Essential for shoulder health and posture. Use rope attachment, pull to face height.",
+        guide: "Set cable at face height with a rope attachment. Step back to create tension. Pull the rope toward your face, splitting the rope ends to either side of your head. Squeeze your rear delts and hold for 1 second. Keep elbows high throughout the movement. Go light — this is about muscle activation, not heavy weight."
+      },
+      {
+        name: "Dumbbell Bicep Curls",
+        muscle: "Biceps",
+        phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
+        note: "Alternate arms or do both together. Don't swing — control the weight.",
+        guide: "Stand with dumbbells at your sides, palms facing forward. Curl the weight up by bending at the elbow only — your upper arm should not move. Squeeze at the top, then lower slowly (3 seconds down). Don't swing your body or use momentum."
+      },
+      {
+        name: "Tricep Pushdowns (Cable)",
+        muscle: "Triceps",
+        phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
+        note: "Use rope or straight bar attachment. Keep elbows pinned to sides.",
+        guide: "Attach a rope or straight bar to the high cable. Stand facing the machine, grip the attachment, pin your elbows to your sides. Push the weight down until your arms are fully extended. Squeeze your triceps at the bottom. Slowly return to the start. Your elbows should not move forward or backward."
+      }
+    ]
+  },
+  // DAY C: Lower Power + Upper Accessories (hybrid day)
+  C: {
+    name: "Day C — Lower Power + Upper Accessories",
+    badge: "full",
+    exercises: [
+      {
+        name: "Smith Machine Squat",
+        muscle: "Quads, Glutes",
+        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
+        note: "Feet slightly forward of the bar for more quad emphasis. Go as deep as comfortable.",
+        guide: "Position the bar across your upper traps. Place feet shoulder-width, slightly IN FRONT of the bar (unlike a free squat). This is safe and intentional in a Smith machine. Squat down until thighs are parallel or slightly below. Drive up through your heels."
+      },
+      {
+        name: "Dumbbell Step-Ups (to bench)",
+        muscle: "Quads, Glutes, Balance",
+        phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
+        note: "The single most hiking-specific exercise. Use a sturdy bench. Drive through the top foot.",
+        guide: "Hold dumbbells at your sides. Place one foot fully on a bench. Drive through that heel to step up, bringing the other foot up to the bench. Step back down with the trailing leg first. Complete all reps on one leg before switching. Don't push off the bottom foot — make the top leg do the work."
+      },
+      {
+        name: "Leg Curl Machine",
+        muscle: "Hamstrings",
+        phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:4,reps:"8-10",rest:"60s"}},
+        note: "Slow controlled reps. Hamstrings protect your knees on downhill sections.",
+        guide: "Lie face down on the machine, pad behind your ankles. Curl your heels toward your glutes. Squeeze at the top for 1 second. Lower slowly (3 seconds). Don't let the weight stack slam at the bottom."
+      },
+      {
+        name: "Dumbbell Lateral Raises",
+        muscle: "Side Delts",
+        phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"10-12",rest:"45s"},4:{sets:4,reps:"10-12",rest:"45s"}},
+        note: "Builds shoulder width. Light weight, controlled reps. Slight lean forward.",
+        guide: "Stand with dumbbells at your sides. Lean forward slightly at the hips (~10 degrees). Raise the dumbbells out to your sides until arms are parallel to the floor (like a T). Lead with your elbows, not your hands. Lower slowly. Use lighter weight than you think — 10-15 lbs is plenty for most people starting out."
+      },
+      {
+        name: "Cable Chest Flyes",
+        muscle: "Chest",
+        phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
+        note: "Set cables at chest height. Slight bend in elbows. Squeeze at center.",
+        guide: "Set both cables at chest height. Stand in the center with one foot forward for balance. Grab both handles, arms wide with a slight bend in elbows. Bring your hands together in front of your chest in a hugging motion. Squeeze your chest for 1 second. Open back up slowly with control."
+      },
+      {
+        name: "Dumbbell Shrugs",
+        muscle: "Upper Traps",
+        phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"10-12",rest:"60s"}},
+        note: "Useful for pack carrying. Shrug straight up (not rolling). Hold at top 1 second.",
+        guide: "Hold heavy dumbbells at your sides. Shrug your shoulders straight UP toward your ears as high as possible. Hold at the top for 1 second. Lower slowly. Don't roll your shoulders — straight up and down only."
+      },
+      {
+        name: "Dead Bug",
+        muscle: "Core, Stability",
+        phases: {1:{sets:2,reps:"8 each side",rest:"45s"},2:{sets:3,reps:"10 each side",rest:"45s"},3:{sets:3,reps:"12 each side",rest:"45s"},4:{sets:3,reps:"12 each side",rest:"45s"}},
+        note: "Lie on back, press lower back into floor. Extend opposite arm/leg. Anti-extension core work.",
+        guide: "Lie on your back with arms extended toward the ceiling and knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — this is the key. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. Your lower back must stay glued to the floor throughout."
+      }
+    ]
+  }
+};
+
+// ========== STATE MANAGEMENT (Google Sheets + localStorage fallback) ==========
+const STORAGE_KEY = "strengthTrainingPlan_v1";
+const SCRIPT_URL_KEY = "strengthTrainingPlan_scriptUrl";
+
+function getDefaultState() {
+  return {
+    currentWeek: 1,
+    logs: {},
+    bodyWeight: [{ date: "2026-06-26", weight: 268.5 }],
+    startDate: new Date().toISOString().split('T')[0]
+  };
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return getDefaultState();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  syncToCloud();
+  showToast("Progress saved");
+}
+
+let state = loadState();
+let syncStatus = "offline"; // "connected", "offline", "syncing", "error"
+
+// ========== GOOGLE SHEETS SYNC ==========
+function getScriptUrl() {
+  return localStorage.getItem(SCRIPT_URL_KEY) || "";
+}
+
+function saveScriptUrl() {
+  const url = document.getElementById("scriptUrlInput").value.trim();
+  if (!url) {
+    showToast("Please enter a URL");
+    return;
+  }
+  localStorage.setItem(SCRIPT_URL_KEY, url);
+  showToast("URL saved — connecting...");
+  syncFromCloud();
+}
+
+function updateSyncUI(status, message) {
+  syncStatus = status;
+  const dot = document.getElementById("syncDot");
+  const text = document.getElementById("syncStatus");
+  dot.className = "sync-dot " + status;
+  text.textContent = message;
+}
+
+async function syncFromCloud() {
+  const url = getScriptUrl();
+  if (!url) {
+    updateSyncUI("offline", "Not connected — set up Google Sheets sync below");
+    return;
+  }
+
+  updateSyncUI("syncing", "Loading from Google Sheets...");
+
+  try {
+    const resp = await fetch(url + "?action=load");
+    const json = await resp.json();
+
+    if (json.status === "ok" && json.data) {
+      const cloudState = json.data;
+      const localJson = localStorage.getItem(STORAGE_KEY);
+      const localState = localJson ? JSON.parse(localJson) : null;
+
+      // Merge: use cloud data as base, keep whichever has more logged workouts
+      const cloudCount = Object.keys(cloudState.logs || {}).filter(k => cloudState.logs[k]?.difficulty > 0).length;
+      const localCount = localState ? Object.keys(localState.logs || {}).filter(k => localState.logs[k]?.difficulty > 0).length : 0;
+
+      if (cloudCount >= localCount) {
+        state = cloudState;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
+        updateSyncUI("connected", `Synced from Google Sheets (${new Date(json.lastUpdated).toLocaleString()})`);
+      } else {
+        // Local has more data — push local to cloud
+        updateSyncUI("connected", "Connected — local data is newer, syncing up...");
+        await pushToCloud();
+        renderAll();
+      }
+    } else if (json.status === "empty") {
+      // Cloud is empty — push local state up
+      updateSyncUI("connected", "Connected — uploading local data to Google Sheets...");
+      await pushToCloud();
+    } else {
+      updateSyncUI("error", "Unexpected response from Google Sheets");
+    }
+  } catch (err) {
+    console.error("Sync error:", err);
+    updateSyncUI("error", "Connection failed — check your Apps Script URL");
+  }
+}
+
+async function syncToCloud() {
+  const url = getScriptUrl();
+  if (!url) return;
+  try {
+    await pushToCloud();
+  } catch(err) {
+    console.error("Cloud save error:", err);
+  }
+}
+
+async function pushToCloud() {
+  const url = getScriptUrl();
+  if (!url) return;
+
+  try {
+    const resp = await fetch(url + "?action=save", {
+      method: "POST",
+      body: JSON.stringify(state),
+      headers: { "Content-Type": "text/plain" }
+    });
+    const json = await resp.json();
+    if (json.status === "saved") {
+      updateSyncUI("connected", `Synced — last save: ${new Date(json.timestamp).toLocaleString()}`);
+    }
+  } catch(err) {
+    updateSyncUI("error", "Save to Google Sheets failed — data safe in browser");
+    throw err;
+  }
+}
+
+async function manualSync() {
+  showToast("Syncing...");
+  await syncFromCloud();
+}
+
+// Initialize: load script URL into input field and attempt cloud sync
+window.addEventListener("DOMContentLoaded", () => {
+  const savedUrl = getScriptUrl();
+  const urlInput = document.getElementById("scriptUrlInput");
+  if (urlInput && savedUrl) {
+    urlInput.value = savedUrl;
+  }
+  syncFromCloud();
+});
+
+// ========== PHASE & ADJUSTMENT LOGIC ==========
+function getPhase(week) {
+  for (const p of PHASES) {
+    if (p.weeks.includes(week)) return p;
+  }
+  return PHASES[PHASES.length - 1];
+}
+
+function getPhaseIndex(week) {
+  return Math.min(Math.ceil(week / 4), 4);
+}
+
+function getAdjustment(dayKey, week) {
+  const prevKey = `W${week - 1}-${dayKey}`;
+  const prevLog = state.logs[prevKey];
+  if (!prevLog || !prevLog.difficulty) return null;
+
+  const diff = prevLog.difficulty;
+  if (diff <= 1) {
+    return { type: "up", message: "Last week felt too easy. Consider increasing weight by 5-10 lbs or adding 1-2 reps per set." };
+  } else if (diff === 2) {
+    return { type: "up", message: "Good work last week. Try adding 2.5-5 lbs or 1 rep per set to keep progressing." };
+  } else if (diff === 3) {
+    return { type: "same", message: "Last week was right on target. Repeat the same weight/reps and focus on form quality." };
+  } else if (diff === 4) {
+    return { type: "down", message: "Last week was tough. Keep the same weight but drop 1-2 reps per set. Focus on controlled movement." };
+  } else {
+    return { type: "down", message: "Last week was too hard. Reduce weight by 5-10 lbs and drop reps. There's no shame in scaling back — consistency beats intensity." };
+  }
+}
+
+// ========== RENDER FUNCTIONS ==========
+function renderWorkouts() {
+  const container = document.getElementById("tab-workouts");
+  const week = state.currentWeek;
+  const phase = getPhase(week);
+  const phaseIdx = getPhaseIndex(week);
+
+  let html = `
+    <div class="week-nav">
+      <button class="week-nav-btn" onclick="changeWeek(-1)" ${week <= 1 ? 'disabled' : ''}>&#8592; Prev</button>
+      <div>
+        <h2>Week ${week}</h2>
+        <div style="font-size:13px;color:var(--text-muted);text-align:center;">${phase.name} Phase</div>
+      </div>
+      <button class="week-nav-btn" onclick="changeWeek(1)" ${week >= 16 ? 'disabled' : ''}>Next &#8594;</button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin-bottom:16px;font-size:13px;color:var(--text-muted);">
+      <strong style="color:var(--text);">${phase.name} Phase:</strong> ${phase.description}
+    </div>
+  `;
+
+  for (const dayKey of ["A", "B", "C"]) {
+    const day = PROGRAM[dayKey];
+    const logKey = `W${week}-${dayKey}`;
+    const log = state.logs[logKey] || {};
+    const isComplete = log.difficulty > 0;
+    const adjustment = getAdjustment(dayKey, week);
+
+    const badgeClass = day.badge === "lower" ? "badge-lower" : day.badge === "upper" ? "badge-upper" : "badge-full";
+
+    html += `
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay('${dayKey}')">
+          <div class="day-title">
+            <h3>${day.name}</h3>
+            <span class="day-badge ${badgeClass}">${day.badge}</span>
+          </div>
+          <div class="day-status">
+            ${isComplete ? '<span style="color:var(--green);">&#10003; Logged</span>' : '<span>Not logged</span>'}
+            <span class="chevron" id="chevron-${dayKey}">&#9654;</span>
+          </div>
+        </div>
+
+        ${adjustment ? `
+        <div class="adjustment-banner" id="adj-${dayKey}">
+          <div class="adj-msg ${adjustment.type === 'up' ? 'adj-up' : adjustment.type === 'down' ? 'adj-down' : 'adj-same'}">
+            <span>${adjustment.type === 'up' ? '&#9650;' : adjustment.type === 'down' ? '&#9660;' : '&#9654;'}</span>
+            <span>${adjustment.message}</span>
+          </div>
+        </div>` : ''}
+
+        <table class="exercise-table" id="table-${dayKey}">
+          <thead>
+            <tr>
+              <th>Exercise</th>
+              <th>Prescription</th>
+              <th>Weight (lbs)</th>
+              <th>Actual Reps</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+    for (const ex of day.exercises) {
+      const rx = ex.phases[phaseIdx];
+      const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
+
+      let weightInputs = '';
+      let repInputs = '';
+      for (let s = 0; s < rx.sets; s++) {
+        const sv = savedSets[s] || {};
+        weightInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.weight || ''}" 
+          onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">`;
+        repInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.reps || ''}" 
+          onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
+        if (s < rx.sets - 1) {
+          weightInputs += ' ';
+          repInputs += ' ';
+        }
+      }
+
+      html += `
+            <tr>
+              <td>
+                <div class="exercise-name">${ex.name}</div>
+                <div class="exercise-note">${ex.note}</div>
+                <span class="muscle-tag">${ex.muscle}</span>
+              </td>
+              <td>${rx.sets} x ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
+              <td>${weightInputs}</td>
+              <td>${repInputs}</td>
+            </tr>`;
+    }
+
+    html += `
+          </tbody>
+        </table>
+        <div class="difficulty-section" id="diff-${dayKey}">
+          <div class="difficulty-label">How difficult was this workout overall?</div>
+          <div class="difficulty-buttons">
+            ${[1,2,3,4,5].map(d => {
+              const labels = ["Too Easy","Moderate","Just Right","Hard","Too Hard"];
+              const selected = log.difficulty === d ? `selected-${d}` : '';
+              return `<button class="diff-btn ${selected}" onclick="rateDifficulty('${logKey}',${d},'${dayKey}')">${d} — ${labels[d-1]}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+  document.getElementById("currentWeekDisplay").textContent = week;
+}
+
+function toggleDay(dayKey) {
+  const table = document.getElementById(`table-${dayKey}`);
+  const diff = document.getElementById(`diff-${dayKey}`);
+  const adj = document.getElementById(`adj-${dayKey}`);
+  const chevron = document.getElementById(`chevron-${dayKey}`);
+  const isOpen = table.classList.contains('open');
+
+  table.classList.toggle('open');
+  diff.classList.toggle('open');
+  if (adj) adj.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+function changeWeek(delta) {
+  state.currentWeek = Math.max(1, Math.min(16, state.currentWeek + delta));
+  saveStateQuiet();
+  renderWorkouts();
+  renderProgress();
+}
+
+function logSet(logKey, exerciseName, setIdx, field, value) {
+  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: 0, sets: {}, date: new Date().toISOString().split('T')[0] };
+  if (!state.logs[logKey].sets[exerciseName]) state.logs[logKey].sets[exerciseName] = [];
+
+  const sets = state.logs[logKey].sets[exerciseName];
+  while (sets.length <= setIdx) sets.push({});
+  sets[setIdx][field] = value ? parseFloat(value) : null;
+  saveStateQuiet();
+}
+
+function rateDifficulty(logKey, rating, dayKey) {
+  if (!state.logs[logKey]) state.logs[logKey] = { difficulty: 0, sets: {}, date: new Date().toISOString().split('T')[0] };
+  state.logs[logKey].difficulty = rating;
+  state.logs[logKey].date = new Date().toISOString().split('T')[0];
+  saveState();
+  renderWorkouts();
+  renderProgress();
+}
+
+let _saveDebounceTimer = null;
+function saveStateQuiet() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Debounce cloud sync — wait 2 seconds of inactivity before pushing
+  clearTimeout(_saveDebounceTimer);
+  _saveDebounceTimer = setTimeout(() => syncToCloud(), 2000);
+}
+
+// ========== SCHEDULE ==========
+function renderSchedule() {
+  const container = document.getElementById("scheduleContent");
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const types = [
+    { type: "strength", label: "Day A\nLower+Core" },
+    { type: "walk", label: "Walk\n3-4 mi" },
+    { type: "strength", label: "Day B\nUpper Body" },
+    { type: "walk", label: "Walk\n3-4 mi" },
+    { type: "strength", label: "Day C\nHybrid" },
+    { type: "hike", label: "Hike\n4-8 mi" },
+    { type: "rest", label: "Rest\nRecover" }
+  ];
+
+  let html = '<div class="schedule-grid">';
+  days.forEach(d => html += `<div class="schedule-day-header">${d}</div>`);
+  types.forEach(t => {
+    html += `<div class="schedule-cell ${t.type}"><div class="cell-label">${t.label.replace('\n','<br>')}</div></div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ========== PROGRESS ==========
+function renderProgress() {
+  let completed = 0;
+  let lastCompletedWeek = 0;
+  const history = [];
+
+  for (let w = 1; w <= 16; w++) {
+    for (const d of ["A","B","C"]) {
+      const key = `W${w}-${d}`;
+      const log = state.logs[key];
+      if (log && log.difficulty > 0) {
+        completed++;
+        lastCompletedWeek = w;
+        const diffLabels = ["","Too Easy","Moderate","Just Right","Hard","Too Hard"];
+        const diffColors = ["","var(--green)","var(--green)","var(--yellow)","var(--red)","var(--red)"];
+        history.push({
+          label: `Week ${w} — ${PROGRAM[d].name}`,
+          difficulty: diffLabels[log.difficulty],
+          color: diffColors[log.difficulty],
+          date: log.date || "",
+          rating: log.difficulty
+        });
+      }
+    }
+  }
+
+  document.getElementById("totalWorkouts").textContent = completed;
+
+  // Streak: count consecutive weeks with at least 2 of 3 workouts done
+  let streak = 0;
+  for (let w = state.currentWeek; w >= 1; w--) {
+    let weekCount = 0;
+    for (const d of ["A","B","C"]) {
+      const log = state.logs[`W${w}-${d}`];
+      if (log && log.difficulty > 0) weekCount++;
+    }
+    if (weekCount >= 2) streak++;
+    else break;
+  }
+  document.getElementById("currentStreak").textContent = streak;
+
+  const phase = getPhase(state.currentWeek);
+  document.getElementById("currentPhase").textContent = phase.name;
+  document.getElementById("phaseWeeks").textContent = `Weeks ${phase.weeks[0]}-${phase.weeks[phase.weeks.length-1]}`;
+
+  // Phase bars
+  for (let p = 1; p <= 4; p++) {
+    const bar = document.getElementById(`phase${p}Bar`);
+    const phaseWeeks = PHASES[p-1].weeks;
+    let phaseDone = 0;
+    for (const w of phaseWeeks) {
+      let weekDone = 0;
+      for (const d of ["A","B","C"]) {
+        const log = state.logs[`W${w}-${d}`];
+        if (log && log.difficulty > 0) weekDone++;
+      }
+      phaseDone += weekDone;
+    }
+    const total = phaseWeeks.length * 3;
+    bar.style.width = `${Math.round((phaseDone / total) * 100)}%`;
+  }
+
+  // History list
+  const historyEl = document.getElementById("historyList");
+  if (history.length === 0) {
+    historyEl.innerHTML = '<li class="history-item" style="color:var(--text-muted);">No workouts logged yet. Complete your first session!</li>';
+  } else {
+    const recent = history.slice(-10).reverse();
+    historyEl.innerHTML = recent.map(h => `
+      <li class="history-item">
+        <div>
+          <div>${h.label}</div>
+          <div style="font-size:12px;color:var(--text-muted);">${h.date}</div>
+        </div>
+        <span class="history-diff" style="background:${h.color}22;color:${h.color};">${h.difficulty}</span>
+      </li>
+    `).join('');
+  }
+}
+
+// ========== EXERCISE GUIDE ==========
+function renderGuide() {
+  const container = document.getElementById("tab-guide");
+  let html = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">How to Use This Program</h3>
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
+        This is a <strong style="color:var(--text);">16-week progressive program</strong> divided into 4 phases. Each phase automatically adjusts the number of sets, reps, and rest periods. After each workout, rate the difficulty from 1-5. The app will display personalized adjustment recommendations for the following week based on your rating.
+      </p>
+      <div class="highlight-box" style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:12px;">
+        <strong>The Difficulty Scale drives everything:</strong><br>
+        <strong>1 (Too Easy)</strong> = Increase weight next week<br>
+        <strong>2 (Moderate)</strong> = Small increase next week<br>
+        <strong>3 (Just Right)</strong> = Repeat same weight/reps<br>
+        <strong>4 (Hard)</strong> = Same weight, fewer reps<br>
+        <strong>5 (Too Hard)</strong> = Reduce weight next week
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Starting Weight Guidelines</h3>
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
+        Since you haven't trained in 15 years, <strong style="color:var(--text);">start lighter than you think you should</strong>. 
+        Your muscles will remember faster than your joints and connective tissue can adapt. Here are rough starting points for Week 1:
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:12px;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Goblet Squat</td>
+          <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbell</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Smith RDL</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bar only or +10-20 lbs</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Leg Press</td>
+          <td style="padding:8px 0;color:var(--text-muted);">90-135 lbs</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Walking Lunges</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight or 10-15 lb dumbbells</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Smith Bench Press</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bar only or +10-20 lbs</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Cable Rows</td>
+          <td style="padding:8px 0;color:var(--text-muted);">40-60 lbs</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Overhead Press</td>
+          <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbells</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Lat Pulldown</td>
+          <td style="padding:8px 0;color:var(--text-muted);">50-70 lbs</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Lateral Raises</td>
+          <td style="padding:8px 0;color:var(--text-muted);">10-15 lb dumbbells</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;font-weight:600;">Curls / Pushdowns</td>
+          <td style="padding:8px 0;color:var(--text-muted);">10-20 lbs</td>
+        </tr>
+      </table>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">
+        <strong style="color:var(--text);">The test:</strong> If you can complete all prescribed reps with good form and rate it a 2 or 3, you picked the right weight. If it's a 1, go up. If it's a 4+, go down. No ego — the first 2 weeks are calibration.
+      </p>
+    </div>
+  `;
+
+  for (const dayKey of ["A", "B", "C"]) {
+    const day = PROGRAM[dayKey];
+    html += `<div class="guide-section">
+      <div class="guide-header" onclick="toggleGuide('guide-${dayKey}')">
+        <h3>${day.name}</h3>
+        <span class="chevron" id="guide-chevron-${dayKey}">&#9654;</span>
+      </div>
+      <div class="guide-body" id="guide-${dayKey}">`;
+
+    for (const ex of day.exercises) {
+      html += `
+        <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:600;color:var(--text);font-size:15px;margin-bottom:4px;">${ex.name}</div>
+          <div style="margin-bottom:4px;"><span class="muscle-tag">${ex.muscle}</span></div>
+          <p style="margin-top:8px;">${ex.guide}</p>
+          <div class="highlight-box" style="margin-top:8px;font-size:13px;">
+            <strong>Why this matters for hiking:</strong> ${ex.note}
+          </div>
+        </div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  // Warmup and cooldown
+  html += `
+    <div class="guide-section">
+      <div class="guide-header" onclick="toggleGuide('guide-warmup')">
+        <h3>Warm-Up Routine (5 min before every session)</h3>
+        <span class="chevron" id="guide-chevron-warmup">&#9654;</span>
+      </div>
+      <div class="guide-body" id="guide-warmup">
+        <p>Do these in order before every workout:</p>
+        <ul>
+          <li><strong>2 min</strong> — Brisk walk or easy bike to raise heart rate</li>
+          <li><strong>30 sec</strong> — Leg swings (front-to-back, 15 each leg)</li>
+          <li><strong>30 sec</strong> — Leg swings (side-to-side, 15 each leg)</li>
+          <li><strong>30 sec</strong> — Arm circles (15 forward, 15 backward)</li>
+          <li><strong>30 sec</strong> — Bodyweight squats (10 reps, slow and controlled)</li>
+          <li><strong>30 sec</strong> — Shoulder pass-throughs with a broomstick or band (if available)</li>
+        </ul>
+        <p style="margin-top:8px;">Then do 1 warm-up set of each exercise at ~50% of your working weight before your first working set.</p>
+      </div>
+    </div>
+    <div class="guide-section">
+      <div class="guide-header" onclick="toggleGuide('guide-cooldown')">
+        <h3>Cool-Down / Stretch (5 min after every session)</h3>
+        <span class="chevron" id="guide-chevron-cooldown">&#9654;</span>
+      </div>
+      <div class="guide-body" id="guide-cooldown">
+        <p>Hold each stretch for 30-45 seconds. Don't bounce.</p>
+        <ul>
+          <li><strong>Standing Quad Stretch</strong> — Pull heel to glute, keep knees together</li>
+          <li><strong>Standing Hamstring Stretch</strong> — Foot on bench, lean forward with flat back</li>
+          <li><strong>Hip Flexor Stretch</strong> — Half-kneeling lunge, push hips forward gently</li>
+          <li><strong>Cross-body Shoulder Stretch</strong> — Pull one arm across chest</li>
+          <li><strong>Overhead Tricep Stretch</strong> — Reach one hand down your back, press elbow with other hand</li>
+          <li><strong>Chest Doorway Stretch</strong> — Arm against a doorframe, turn body away</li>
+          <li><strong>Cat-Cow</strong> — On all fours, alternate arching and rounding your spine (10 reps)</li>
+        </ul>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+function toggleGuide(id) {
+  const body = document.getElementById(id);
+  const dayKey = id.replace('guide-','');
+  const chevron = document.getElementById(`guide-chevron-${dayKey}`);
+  body.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+// ========== TABS ==========
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+  });
+});
+
+// ========== EXPORT/IMPORT/RESET ==========
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `strength_plan_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Data exported");
+}
+
+function importData() {
+  document.getElementById('importInput').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.logs && imported.currentWeek) {
+        state = imported;
+        saveStateQuiet();
+        renderAll();
+        showToast("Data imported successfully");
+      } else {
+        showToast("Invalid backup file");
+      }
+    } catch(err) {
+      showToast("Error reading file");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function resetAll() {
+  if (confirm("Are you sure? This will erase all logged workouts and progress. Consider exporting first.")) {
+    state = getDefaultState();
+    localStorage.removeItem(STORAGE_KEY);
+    renderAll();
+    showToast("All data reset");
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
+// ========== INIT ==========
+function renderAll() {
+  renderWorkouts();
+  renderSchedule();
+  renderProgress();
+  renderGuide();
+}
+
+renderAll();
+</script>
+</body>
+</html>
