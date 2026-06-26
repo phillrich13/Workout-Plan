@@ -880,35 +880,35 @@ function updateSyncUI(status, message) {
   text.textContent = message;
 }
 
-// JSONP loader — injects a <script> tag to bypass CORS
-let _jsonpCounter = 0;
-function jsonpFetch(url) {
-  return new Promise((resolve, reject) => {
-    const callbackName = "_jsonpCb" + (++_jsonpCounter);
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error("Request timed out"));
-    }, 15000);
+// Google Apps Script redirects (302) to script.googleusercontent.com
+// which DOES support CORS. We follow the redirect manually to get
+// the final URL, then fetch from that.
+async function gasFetch(url) {
+  // First, try a direct fetch — works when the browser follows the
+  // redirect transparently (most modern browsers do for GET)
+  try {
+    const resp = await fetch(url, { redirect: "follow" });
+    if (resp.ok) {
+      return await resp.json();
+    }
+  } catch(e) { /* fall through to JSONP */ }
 
+  // Fallback: JSONP for environments where fetch redirect fails
+  return new Promise((resolve, reject) => {
+    const cbName = "_gasCb" + Date.now();
+    const timeout = setTimeout(() => { cleanup(); reject(new Error("Timeout")); }, 15000);
     function cleanup() {
       clearTimeout(timeout);
-      delete window[callbackName];
-      if (script.parentNode) script.parentNode.removeChild(script);
+      delete window[cbName];
+      const el = document.getElementById(cbName);
+      if (el) el.remove();
     }
-
-    window[callbackName] = function(data) {
-      cleanup();
-      resolve(data);
-    };
-
-    const script = document.createElement("script");
-    const separator = url.includes("?") ? "&" : "?";
-    script.src = url + separator + "callback=" + callbackName;
-    script.onerror = function() {
-      cleanup();
-      reject(new Error("Script load failed"));
-    };
-    document.body.appendChild(script);
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+    const s = document.createElement("script");
+    s.id = cbName;
+    s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cbName;
+    s.onerror = function() { cleanup(); reject(new Error("Load failed")); };
+    document.body.appendChild(s);
   });
 }
 
@@ -922,7 +922,7 @@ async function syncFromCloud() {
   updateSyncUI("syncing", "Loading from Google Sheets...");
 
   try {
-    const json = await jsonpFetch(url + "?action=load");
+    const json = await gasFetch(url + "?action=load");
 
     if (json.status === "ok" && json.data) {
       const cloudState = json.data;
@@ -970,7 +970,7 @@ async function pushToCloud() {
 
   try {
     const stateStr = encodeURIComponent(JSON.stringify(state));
-    const json = await jsonpFetch(url + "?action=save&data=" + stateStr);
+    const json = await gasFetch(url + "?action=save&data=" + stateStr);
     if (json.status === "saved") {
       updateSyncUI("connected", `Synced — last save: ${new Date(json.timestamp).toLocaleString()}`);
     }
