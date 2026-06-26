@@ -1039,17 +1039,15 @@ function renderWorkouts() {
     </div>`;
   }
 
-  if (dayKey === "A") {
-    html += `<div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="font-size:14px;font-weight:600;">Weigh-in:</span>
-        <input type="number" class="log-input" placeholder="lbs" step="0.5" min="0"
-          style="width:80px;" value="${(log.bodyWeight || '')}"
-          onchange="logWeighIn('${logKey}', this.value)">
-        <span style="font-size:13px;color:var(--text-muted);">lbs — log your weight each Day A</span>
-      </div>
-    </div>`;
-  }
+  html += `<div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:14px;font-weight:600;">Weigh-in:</span>
+      <input type="number" class="log-input" placeholder="lbs" step="0.5" min="0"
+        style="width:80px;" value="${(log.bodyWeight || '')}"
+        onchange="logWeighIn('${logKey}', this.value)">
+      <span style="font-size:13px;color:var(--text-muted);">lbs</span>
+    </div>
+  </div>`;
 
   html += `<table class="exercise-table open">
     <thead><tr>
@@ -1127,12 +1125,13 @@ function logWeighIn(logKey, value) {
 function updateCurrentWeight() {
   const el = document.getElementById("currentWeightDisplay");
   if (!el) return;
-  // Find the most recent Day A weigh-in
   for (let w = 16; w >= 1; w--) {
-    const log = state.logs[`W${w}-A`];
-    if (log && log.bodyWeight) {
-      el.textContent = log.bodyWeight + " lbs";
-      return;
+    for (const d of ["C","B","A"]) {
+      const log = state.logs[`W${w}-${d}`];
+      if (log && log.bodyWeight) {
+        el.textContent = log.bodyWeight + " lbs";
+        return;
+      }
     }
   }
   el.textContent = "—";
