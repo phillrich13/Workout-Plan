@@ -206,9 +206,8 @@
   }
   .exercise-table tr:last-child td { border-bottom: none; }
 
-  /* Exercise Cards (mobile) */
-  .exercise-cards { display: none; }
-  .exercise-cards.open { display: block; }
+  /* Exercise Cards (mobile only — hidden on desktop) */
+  .exercise-cards { display: none !important; }
   .exercise-card {
     padding: 14px 16px;
     border-top: 1px solid var(--border);
@@ -401,45 +400,6 @@
     color: var(--text);
   }
 
-  /* Schedule Tab */
-  .schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    margin-bottom: 24px;
-  }
-  .schedule-day-header {
-    text-align: center;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    padding: 8px 4px;
-  }
-  .schedule-cell {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 8px;
-    text-align: center;
-    min-height: 70px;
-    font-size: 12px;
-  }
-  .schedule-cell.rest { opacity: 0.5; }
-  .schedule-cell.strength { border-color: var(--accent); background: var(--accent-dim); }
-  .schedule-cell.walk { border-color: var(--green); background: var(--green-dim); }
-  .schedule-cell.hike { border-color: var(--blue); background: var(--blue-dim); }
-  .schedule-cell .cell-label { font-weight: 600; margin-top: 4px; font-size: 11px; }
-  .schedule-legend {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
   /* Sync Status */
   .sync-bar {
     display: flex;
@@ -514,14 +474,12 @@
     .container { padding: 10px; }
     .header h1 { font-size: 22px; }
     .profile-card { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px; }
-    .exercise-table.open { display: none; }
-    .exercise-cards.open { display: block; }
+    .exercise-table.open { display: none !important; }
+    .exercise-cards.open { display: block !important; }
     .log-input { width: 52px; font-size: 15px; padding: 8px 4px; }
     .tabs { gap: 2px; }
     .tab { padding: 8px 10px; font-size: 12px; }
     .day-tab { padding: 8px 8px; font-size: 12px; }
-    .schedule-grid { grid-template-columns: repeat(7, 1fr); gap: 2px; }
-    .schedule-cell { padding: 6px 4px; min-height: 55px; }
     .diff-btn { padding: 10px 8px; font-size: 12px; min-width: 60px; }
   }
 </style>
@@ -559,7 +517,6 @@
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" data-tab="workouts">Workouts</button>
-    <button class="tab" data-tab="schedule">Weekly Schedule</button>
     <button class="tab" data-tab="progress">Progress</button>
     <button class="tab" data-tab="guide">Exercise Guide</button>
   </div>
@@ -567,54 +524,6 @@
   <!-- WORKOUTS TAB -->
   <div class="tab-content active" id="tab-workouts"></div>
 
-  <!-- SCHEDULE TAB -->
-  <div class="tab-content" id="tab-schedule">
-    <div class="schedule-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Strength</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Walk</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Hike</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div> Rest</div>
-    </div>
-    <div id="scheduleContent"></div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;">
-      <h3 style="font-size:16px;font-weight:600;margin-bottom:12px;">Recommended Weekly Layout</h3>
-      <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
-        The plan alternates strength and walking days to allow recovery. Strength days are placed on <strong style="color:var(--text)">Monday, Wednesday, and Friday</strong> so your legs recover in between for walking. Saturday remains your long hike day. Sunday is full rest.
-      </p>
-      <div style="margin-top:16px;">
-        <table style="width:100%;border-collapse:collapse;font-size:14px;">
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px 0;font-weight:600;">Monday</td>
-            <td style="padding:8px 0;color:var(--accent);">Day A — Lower Body + Core</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px 0;font-weight:600;">Tuesday</td>
-            <td style="padding:8px 0;color:var(--green);">Walk 3-4 mi</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px 0;font-weight:600;">Wednesday</td>
-            <td style="padding:8px 0;color:var(--accent);">Day B — Upper Body Push + Pull</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px 0;font-weight:600;">Thursday</td>
-            <td style="padding:8px 0;color:var(--green);">Walk 3-4 mi</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px 0;font-weight:600;">Friday</td>
-            <td style="padding:8px 0;color:var(--accent);">Day C — Lower Power + Upper Accessories</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px 0;font-weight:600;">Saturday</td>
-            <td style="padding:8px 0;color:var(--blue);">Hike 4-8 mi</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;font-weight:600;">Sunday</td>
-            <td style="padding:8px 0;color:var(--text-muted);">Full Rest / Light Stretch</td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </div>
 
   <!-- PROGRESS TAB -->
   <div class="tab-content" id="tab-progress">
@@ -704,12 +613,14 @@ const PHASES = [
 const PROGRAM = {
   // DAY A: Lower Body + Core (hiking priority)
   A: {
-    name: "Day A — Lower Body + Core",
+    name: "Monday — Lower Body + Core",
     badge: "lower",
     exercises: [
       {
         name: "Goblet Squat (Dumbbell)",
         muscle: "Quads, Glutes",
+        purpose: "Why this matters for hiking",
+        startWeight: "20-30 lb dumbbell",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
         note: "Hold one dumbbell at chest height. Sit back and down, keeping chest tall. Key lift for steep uphill power.",
         guide: "Stand shoulder-width apart, hold a dumbbell vertically against your chest with both hands. Push hips back, bend knees, lower until thighs are at least parallel. Drive through heels to stand. Keep your torso upright throughout."
@@ -717,6 +628,8 @@ const PROGRAM = {
       {
         name: "Smith Machine Romanian Deadlift",
         muscle: "Hamstrings, Glutes, Lower Back",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bar only or +10-20 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
         note: "Slight knee bend, hinge at hips, feel stretch in hamstrings. Critical for downhill control on trails.",
         guide: "Stand in the Smith machine with feet hip-width apart. Unhook the bar at hip height. With a slight bend in your knees (keep them fixed), hinge at the hips pushing your butt back. Lower the bar along your thighs until you feel a deep hamstring stretch (mid-shin area). Squeeze glutes to return to standing."
@@ -724,6 +637,8 @@ const PROGRAM = {
       {
         name: "Leg Press Machine",
         muscle: "Quads, Glutes",
+        purpose: "Why this matters for hiking",
+        startWeight: "90-135 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
         note: "Feet high and wide on platform for more glute/hamstring emphasis (hiking muscles).",
         guide: "Sit in the leg press, place feet shoulder-width apart and HIGH on the platform (this targets glutes/hams more). Lower the weight until knees form ~90 degrees. Press through your heels to extend. Don't lock knees at the top."
@@ -731,6 +646,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Walking Lunges",
         muscle: "Quads, Glutes, Balance",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bodyweight or 10-15 lb dumbbells",
         phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
         note: "Directly mimics uphill stepping. Keep torso upright, long stride.",
         guide: "Hold dumbbells at your sides. Take a big step forward, lower your back knee toward the floor until both knees form ~90 degree angles. Push off your front foot to step forward into the next lunge. Alternate legs. Keep your torso upright and core tight."
@@ -738,6 +655,8 @@ const PROGRAM = {
       {
         name: "Standing Calf Raises (Smith Machine)",
         muscle: "Calves",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bar only or +10-20 lbs",
         phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"15-20",rest:"45s"},3:{sets:4,reps:"12-15",rest:"45s"},4:{sets:4,reps:"12-15",rest:"45s"}},
         note: "Use a step or plate for full range of motion. Calves are critical for steep inclines.",
         guide: "Place the bar across your shoulders in the Smith machine. Stand on a step or plate with just the balls of your feet. Lower heels below the step for a full stretch, then rise up onto your toes as high as possible. Pause at the top for 1 second."
@@ -745,6 +664,8 @@ const PROGRAM = {
       {
         name: "Cable Woodchops",
         muscle: "Core, Obliques",
+        purpose: "Why this matters for hiking",
+        startWeight: "15-25 lbs",
         phases: {1:{sets:2,reps:"12 each side",rest:"45s"},2:{sets:3,reps:"12 each side",rest:"45s"},3:{sets:3,reps:"10 each side",rest:"60s"},4:{sets:3,reps:"10 each side",rest:"60s"}},
         note: "Rotational core strength helps with trail balance on uneven terrain.",
         guide: "Set cable at highest position. Stand sideways to the machine, grab handle with both hands. Pull the cable diagonally across your body from high to low, rotating your torso. Control the weight back up. Keep arms relatively straight — the rotation comes from your core, not your arms."
@@ -752,6 +673,8 @@ const PROGRAM = {
       {
         name: "Plank Hold",
         muscle: "Core",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bodyweight",
         phases: {1:{sets:2,reps:"20-30 sec",rest:"45s"},2:{sets:3,reps:"30-45 sec",rest:"45s"},3:{sets:3,reps:"45-60 sec",rest:"45s"},4:{sets:3,reps:"60 sec",rest:"45s"}},
         note: "Foundation core stability. Squeeze glutes, don't let hips sag.",
         guide: "Get on your forearms and toes, body in a straight line from head to heels. Squeeze your glutes, brace your abs as if someone is about to punch your stomach, and hold. Don't let your hips sag or pike up. Breathe steadily."
@@ -760,12 +683,14 @@ const PROGRAM = {
   },
   // DAY B: Upper Body Push + Pull (aesthetics focus)
   B: {
-    name: "Day B — Upper Body Push + Pull",
+    name: "Wednesday — Upper Body Push + Pull",
     badge: "upper",
     exercises: [
       {
         name: "Smith Machine Bench Press",
         muscle: "Chest, Front Delts, Triceps",
+        purpose: "How this builds your physique",
+        startWeight: "Bar only or +10-20 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
         note: "Primary chest builder. Grip slightly wider than shoulders. Control the descent.",
         guide: "Lie on the bench under the Smith machine. Grip the bar slightly wider than shoulder-width. Unhook and lower the bar to mid-chest with control (2-3 seconds down). Press up explosively. The Smith machine guides the bar path, so focus on squeezing your chest at the top."
@@ -773,6 +698,8 @@ const PROGRAM = {
       {
         name: "Seated Cable Row",
         muscle: "Mid Back, Lats, Biceps",
+        purpose: "How this builds your physique",
+        startWeight: "40-60 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
         note: "Squeeze shoulder blades together at the end of each rep. Builds posture and back width.",
         guide: "Sit at the cable row station with feet on the platform, slight bend in knees. Grab the handle, sit tall with chest up. Pull the handle to your lower chest/upper abdomen, squeezing your shoulder blades together hard at the end. Slowly return to the start with arms extended. Don't round your back."
@@ -780,6 +707,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Overhead Press (Seated)",
         muscle: "Shoulders, Triceps",
+        purpose: "How this builds your physique",
+        startWeight: "15-20 lb dumbbells",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
         note: "Seated for back support. Press to full lockout. Builds the capped shoulder look.",
         guide: "Sit on a bench with back support set to ~85 degrees (almost vertical). Hold dumbbells at shoulder height, palms facing forward. Press them up until arms are fully extended overhead. Lower back to shoulder height with control. Don't arch your lower back excessively."
@@ -787,6 +716,8 @@ const PROGRAM = {
       {
         name: "Lat Pulldown Machine",
         muscle: "Lats, Upper Back, Biceps",
+        purpose: "How this builds your physique",
+        startWeight: "50-70 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
         note: "Wide grip for V-taper. Pull to upper chest, lean back slightly.",
         guide: "Sit at the lat pulldown, grip the bar wider than shoulder-width. Lean back slightly (~15 degrees), pull the bar down to your upper chest, driving your elbows down and back. Squeeze your lats at the bottom. Control the weight back up — don't let it yank you."
@@ -794,6 +725,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Incline Press",
         muscle: "Upper Chest, Shoulders",
+        purpose: "How this builds your physique",
+        startWeight: "15-25 lb dumbbells",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"75s"},4:{sets:3,reps:"8-10",rest:"75s"}},
         note: "Set bench to 30-45 degrees. Builds upper chest fullness.",
         guide: "Set an adjustable bench to 30-45 degrees. Lie back with dumbbells at chest level, palms forward. Press the dumbbells up and slightly toward each other (without clanking). Lower slowly until you feel a stretch across your upper chest."
@@ -801,6 +734,8 @@ const PROGRAM = {
       {
         name: "Cable Face Pulls",
         muscle: "Rear Delts, Rotator Cuff",
+        purpose: "How this builds your physique",
+        startWeight: "15-25 lbs",
         phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"12-15",rest:"45s"},4:{sets:3,reps:"12-15",rest:"45s"}},
         note: "Essential for shoulder health and posture. Use rope attachment, pull to face height.",
         guide: "Set cable at face height with a rope attachment. Step back to create tension. Pull the rope toward your face, splitting the rope ends to either side of your head. Squeeze your rear delts and hold for 1 second. Keep elbows high throughout the movement. Go light — this is about muscle activation, not heavy weight."
@@ -808,6 +743,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Bicep Curls",
         muscle: "Biceps",
+        purpose: "How this builds your physique",
+        startWeight: "10-20 lb dumbbells",
         phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
         note: "Alternate arms or do both together. Don't swing — control the weight.",
         guide: "Stand with dumbbells at your sides, palms facing forward. Curl the weight up by bending at the elbow only — your upper arm should not move. Squeeze at the top, then lower slowly (3 seconds down). Don't swing your body or use momentum."
@@ -815,6 +752,8 @@ const PROGRAM = {
       {
         name: "Tricep Pushdowns (Cable)",
         muscle: "Triceps",
+        purpose: "How this builds your physique",
+        startWeight: "20-30 lbs",
         phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
         note: "Use rope or straight bar attachment. Keep elbows pinned to sides.",
         guide: "Attach a rope or straight bar to the high cable. Stand facing the machine, grip the attachment, pin your elbows to your sides. Push the weight down until your arms are fully extended. Squeeze your triceps at the bottom. Slowly return to the start. Your elbows should not move forward or backward."
@@ -823,12 +762,14 @@ const PROGRAM = {
   },
   // DAY C: Lower Power + Upper Accessories (hybrid day)
   C: {
-    name: "Day C — Lower Power + Upper Accessories",
+    name: "Friday — Lower Power + Upper Accessories",
     badge: "full",
     exercises: [
       {
         name: "Smith Machine Squat",
         muscle: "Quads, Glutes",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bar only or +10-20 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
         note: "Feet slightly forward of the bar for more quad emphasis. Go as deep as comfortable.",
         guide: "Position the bar across your upper traps. Place feet shoulder-width, slightly IN FRONT of the bar (unlike a free squat). This is safe and intentional in a Smith machine. Squat down until thighs are parallel or slightly below. Drive up through your heels."
@@ -836,6 +777,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Step-Ups (to bench)",
         muscle: "Quads, Glutes, Balance",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bodyweight or 10-15 lb dumbbells",
         phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
         note: "The single most hiking-specific exercise. Use a sturdy bench. Drive through the top foot.",
         guide: "Hold dumbbells at your sides. Place one foot fully on a bench. Drive through that heel to step up, bringing the other foot up to the bench. Step back down with the trailing leg first. Complete all reps on one leg before switching. Don't push off the bottom foot — make the top leg do the work."
@@ -843,6 +786,8 @@ const PROGRAM = {
       {
         name: "Leg Curl Machine",
         muscle: "Hamstrings",
+        purpose: "Why this matters for hiking",
+        startWeight: "40-60 lbs",
         phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:4,reps:"8-10",rest:"60s"}},
         note: "Slow controlled reps. Hamstrings protect your knees on downhill sections.",
         guide: "Lie face down on the machine, pad behind your ankles. Curl your heels toward your glutes. Squeeze at the top for 1 second. Lower slowly (3 seconds). Don't let the weight stack slam at the bottom."
@@ -850,6 +795,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Lateral Raises",
         muscle: "Side Delts",
+        purpose: "How this builds your physique",
+        startWeight: "10-15 lb dumbbells",
         phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"10-12",rest:"45s"},4:{sets:4,reps:"10-12",rest:"45s"}},
         note: "Builds shoulder width. Light weight, controlled reps. Slight lean forward.",
         guide: "Stand with dumbbells at your sides. Lean forward slightly at the hips (~10 degrees). Raise the dumbbells out to your sides until arms are parallel to the floor (like a T). Lead with your elbows, not your hands. Lower slowly. Use lighter weight than you think — 10-15 lbs is plenty for most people starting out."
@@ -857,6 +804,8 @@ const PROGRAM = {
       {
         name: "Cable Chest Flyes",
         muscle: "Chest",
+        purpose: "How this builds your physique",
+        startWeight: "10-20 lbs per side",
         phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
         note: "Set cables at chest height. Slight bend in elbows. Squeeze at center.",
         guide: "Set both cables at chest height. Stand in the center with one foot forward for balance. Grab both handles, arms wide with a slight bend in elbows. Bring your hands together in front of your chest in a hugging motion. Squeeze your chest for 1 second. Open back up slowly with control."
@@ -864,6 +813,8 @@ const PROGRAM = {
       {
         name: "Dumbbell Shrugs",
         muscle: "Upper Traps",
+        purpose: "Why this matters for hiking",
+        startWeight: "25-40 lb dumbbells",
         phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"10-12",rest:"60s"}},
         note: "Useful for pack carrying. Shrug straight up (not rolling). Hold at top 1 second.",
         guide: "Hold heavy dumbbells at your sides. Shrug your shoulders straight UP toward your ears as high as possible. Hold at the top for 1 second. Lower slowly. Don't roll your shoulders — straight up and down only."
@@ -871,6 +822,8 @@ const PROGRAM = {
       {
         name: "Dead Bug",
         muscle: "Core, Stability",
+        purpose: "Why this matters for hiking",
+        startWeight: "Bodyweight",
         phases: {1:{sets:2,reps:"8 each side",rest:"45s"},2:{sets:3,reps:"10 each side",rest:"45s"},3:{sets:3,reps:"12 each side",rest:"45s"},4:{sets:3,reps:"12 each side",rest:"45s"}},
         note: "Lie on back, press lower back into floor. Extend opposite arm/leg. Anti-extension core work.",
         guide: "Lie on your back with arms extended toward the ceiling and knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — this is the key. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. Your lower back must stay glued to the floor throughout."
@@ -882,12 +835,17 @@ const PROGRAM = {
 // ========== STATE MANAGEMENT (Firebase + localStorage fallback) ==========
 const STORAGE_KEY = "strengthTrainingPlan_v1";
 
-const firebaseConfig = {
-  databaseURL: "https://workout-plan-bba64-default-rtdb.firebaseio.com"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const dbRef = db.ref("workoutState");
+let db = null;
+let dbRef = null;
+try {
+  if (typeof firebase !== "undefined") {
+    firebase.initializeApp({ databaseURL: "https://workout-plan-bba64-default-rtdb.firebaseio.com" });
+    db = firebase.database();
+    dbRef = db.ref("workoutState");
+  }
+} catch(e) {
+  console.warn("Firebase unavailable, running in offline mode:", e);
+}
 
 function getDefaultState() {
   return {
@@ -925,6 +883,10 @@ function updateSyncUI(status, message) {
 
 // ========== FIREBASE SYNC ==========
 async function syncFromCloud() {
+  if (!dbRef) {
+    updateSyncUI("offline", "Offline mode — data saved in browser");
+    return;
+  }
   updateSyncUI("syncing", "Syncing with Firebase...");
 
   try {
@@ -954,6 +916,7 @@ async function syncFromCloud() {
 }
 
 async function syncToCloud() {
+  if (!dbRef) return;
   try {
     await pushToCloud();
   } catch(err) {
@@ -962,6 +925,7 @@ async function syncToCloud() {
 }
 
 async function pushToCloud() {
+  if (!dbRef) return;
   try {
     await dbRef.set(state);
     updateSyncUI("connected", "Saved — " + new Date().toLocaleTimeString());
@@ -972,25 +936,31 @@ async function pushToCloud() {
 }
 
 async function manualSync() {
+  if (!dbRef) {
+    showToast("Offline mode — no cloud sync available");
+    return;
+  }
   showToast("Syncing...");
   await syncFromCloud();
 }
 
 // Listen for real-time changes from other devices
-dbRef.on("value", (snapshot) => {
-  const cloudState = snapshot.val();
-  if (!cloudState || !cloudState.logs) return;
+if (dbRef) {
+  dbRef.on("value", (snapshot) => {
+    const cloudState = snapshot.val();
+    if (!cloudState || !cloudState.logs) return;
 
-  const cloudCount = Object.keys(cloudState.logs).filter(k => cloudState.logs[k]?.difficulty > 0).length;
-  const localCount = Object.keys(state.logs || {}).filter(k => state.logs[k]?.difficulty > 0).length;
+    const cloudCount = Object.keys(cloudState.logs).filter(k => cloudState.logs[k]?.difficulty > 0).length;
+    const localCount = Object.keys(state.logs || {}).filter(k => state.logs[k]?.difficulty > 0).length;
 
-  if (cloudCount > localCount) {
-    state = cloudState;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    renderAll();
-    updateSyncUI("connected", "Live update received — " + new Date().toLocaleTimeString());
-  }
-});
+    if (cloudCount > localCount) {
+      state = cloudState;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+      updateSyncUI("connected", "Live update received — " + new Date().toLocaleTimeString());
+    }
+  });
+}
 
 // Initial sync on page load
 window.addEventListener("DOMContentLoaded", () => {
@@ -1036,8 +1006,8 @@ function renderWorkouts() {
   const phaseIdx = getPhaseIndex(week);
 
   // Day sub-tabs
-  const dayLabels = { A: "Day A — Lower + Core", B: "Day B — Upper Body", C: "Day C — Hybrid" };
-  const dayShort = { A: "Day A", B: "Day B", C: "Day C" };
+  const dayLabels = { A: "Monday — Lower + Core", B: "Wednesday — Upper Body", C: "Friday — Hybrid" };
+  const dayShort = { A: "Mon", B: "Wed", C: "Fri" };
   let html = `
     <div class="week-nav">
       <button class="week-nav-btn" onclick="changeWeek(-1)" ${week <= 1 ? 'disabled' : ''}>&#8592; Prev</button>
@@ -1125,11 +1095,13 @@ function renderWorkouts() {
       if (s < rx.sets - 1) { weightInputs += ' '; repInputs += ' '; }
     }
 
+    const startHintDesktop = (week <= 2 && ex.startWeight) ? `<div style="font-size:11px;color:var(--accent);margin-top:4px;">&#9654; Start: ${ex.startWeight}</div>` : '';
     html += `<tr>
       <td>
         <div class="exercise-name">${ex.name}</div>
         <div class="exercise-note">${ex.note}</div>
         <span class="muscle-tag">${ex.muscle}</span>
+        ${startHintDesktop}
       </td>
       <td>${rx.sets} x ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
       <td>${weightInputs}</td>
@@ -1159,18 +1131,20 @@ function renderWorkouts() {
       </div>`;
     }
 
+    const startHintMobile = (week <= 2 && ex.startWeight) ? `<div style="font-size:12px;color:var(--accent);padding:4px 0;">&#9654; Start: ${ex.startWeight}</div>` : '';
     html += `<div class="exercise-card">
       <div class="exercise-card-header">
         <div>
           <div class="exercise-name">${ex.name}</div>
           <span class="muscle-tag">${ex.muscle}</span>
+          ${startHintMobile}
         </div>
         <div class="exercise-card-rx">${rx.sets} &times; ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);font-weight:400;">Rest: ${rx.rest}</span></div>
       </div>
       <div class="exercise-card-inputs">${setInputs}</div>
     </div>`;
   }
-  html += `</div>`;
+  html += `</div>
     <div class="difficulty-section open">
       <div class="difficulty-label">How difficult was this workout overall?</div>
       <div class="difficulty-buttons">
@@ -1247,29 +1221,6 @@ function saveStateQuiet() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   clearTimeout(_saveDebounceTimer);
   _saveDebounceTimer = setTimeout(() => pushToCloud().catch(() => {}), 2000);
-}
-
-// ========== SCHEDULE ==========
-function renderSchedule() {
-  const container = document.getElementById("scheduleContent");
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const types = [
-    { type: "strength", label: "Day A\nLower+Core" },
-    { type: "walk", label: "Walk\n3-4 mi" },
-    { type: "strength", label: "Day B\nUpper Body" },
-    { type: "walk", label: "Walk\n3-4 mi" },
-    { type: "strength", label: "Day C\nHybrid" },
-    { type: "hike", label: "Hike\n4-8 mi" },
-    { type: "rest", label: "Rest\nRecover" }
-  ];
-
-  let html = '<div class="schedule-grid">';
-  days.forEach(d => html += `<div class="schedule-day-header">${d}</div>`);
-  types.forEach(t => {
-    html += `<div class="schedule-cell ${t.type}"><div class="cell-label">${t.label.replace('\n','<br>')}</div></div>`;
-  });
-  html += '</div>';
-  container.innerHTML = html;
 }
 
 // ========== PROGRESS ==========
@@ -1440,7 +1391,7 @@ function renderGuide() {
           <div style="margin-bottom:4px;"><span class="muscle-tag">${ex.muscle}</span></div>
           <p style="margin-top:8px;">${ex.guide}</p>
           <div class="highlight-box" style="margin-top:8px;font-size:13px;">
-            <strong>Why this matters for hiking:</strong> ${ex.note}
+            <strong>${ex.purpose || "Why this matters"}:</strong> ${ex.note}
           </div>
         </div>`;
     }
@@ -1567,7 +1518,6 @@ function showToast(msg) {
 // ========== INIT ==========
 function renderAll() {
   renderWorkouts();
-  renderSchedule();
   renderProgress();
   renderGuide();
 }
