@@ -1083,7 +1083,7 @@ function renderWorkouts() {
   html += `<div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <span style="font-size:14px;font-weight:600;">Weigh-in:</span>
-      <input type="number" class="log-input" placeholder="lbs" step="0.5" min="0"
+      <input type="number" inputmode="decimal" class="log-input" placeholder="lbs" step="0.5" min="0"
         style="width:80px;" value="${(log.bodyWeight || '')}"
         onchange="logWeighIn('${logKey}', this.value)">
       <span style="font-size:13px;color:var(--text-muted);">lbs</span>
@@ -1107,9 +1107,9 @@ function renderWorkouts() {
     let repInputs = '';
     for (let s = 0; s < rx.sets; s++) {
       const sv = savedSets[s] || {};
-      weightInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.weight || ''}" 
+      weightInputs += `<input type="number" inputmode="decimal" class="log-input" placeholder="—" value="${sv.weight || ''}" 
         onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">`;
-      repInputs += `<input type="number" class="log-input" placeholder="—" value="${sv.reps || ''}" 
+      repInputs += `<input type="number" inputmode="numeric" class="log-input" placeholder="—" value="${sv.reps || ''}" 
         onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
       if (s < rx.sets - 1) { weightInputs += ' '; repInputs += ' '; }
     }
@@ -1141,10 +1141,10 @@ function renderWorkouts() {
       setInputs += `<div class="input-group">
         <div class="input-group-label">Set ${s + 1}</div>
         <div class="input-pair">
-          <input type="number" class="log-input" placeholder="lbs" value="${sv.weight || ''}" 
+          <input type="number" inputmode="decimal" class="log-input" placeholder="lbs" value="${sv.weight || ''}" 
             onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">
           <span class="x-label">&times;</span>
-          <input type="number" class="log-input" placeholder="reps" value="${sv.reps || ''}" 
+          <input type="number" inputmode="numeric" class="log-input" placeholder="reps" value="${sv.reps || ''}" 
             onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">
         </div>
       </div>`;
