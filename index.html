@@ -513,7 +513,7 @@
   <div class="profile-card">
     <div class="profile-stat">
       <div class="label">Starting Weight</div>
-      <div class="value">268.5 lbs</div>
+      <div class="value" id="startingWeightDisplay">—</div>
     </div>
     <div class="profile-stat">
       <div class="label">Current Weight</div>
@@ -560,6 +560,15 @@
         <div class="streak-number" id="currentPhase" style="font-size:24px;">Foundation</div>
         <div class="streak-label" id="phaseWeeks">Weeks 1-4</div>
       </div>
+      <div class="progress-card">
+        <h3>Total Weight Loss</h3>
+        <div class="streak-number" id="totalWeightLoss" style="color:var(--green);">—</div>
+        <div class="streak-label" id="weightLossPct">—</div>
+      </div>
+    </div>
+    <div class="progress-card" style="margin-bottom:16px;">
+      <h3>Weight Over Time</h3>
+      <div id="weightChart" style="margin-top:12px;"></div>
     </div>
     <div class="progress-card" style="margin-bottom:16px;">
       <h3>Recent Workout History</h3>
@@ -692,6 +701,7 @@ const PROGRAM = {
         muscle: "Core",
         purpose: "Why this matters for hiking",
         startWeight: "Bodyweight",
+        inputType: "timed",
         phases: {1:{sets:2,reps:"20-30 sec",rest:"45s"},2:{sets:3,reps:"30-45 sec",rest:"45s"},3:{sets:3,reps:"45-60 sec",rest:"45s"},4:{sets:3,reps:"60 sec",rest:"45s"}},
         note: "Builds the deep core endurance that keeps your posture solid over miles and prevents low-back fatigue on long hikes.",
         guide: "Get on your forearms and toes, body in a straight line from head to heels. Squeeze your glutes, brace your abs as if someone is about to punch your stomach, and hold. Don't let your hips sag or pike up. Breathe steadily."
@@ -841,6 +851,7 @@ const PROGRAM = {
         muscle: "Core, Stability",
         purpose: "Why this matters for hiking",
         startWeight: "Bodyweight",
+        inputType: "bodyweight",
         phases: {1:{sets:2,reps:"8 each side",rest:"45s"},2:{sets:3,reps:"10 each side",rest:"45s"},3:{sets:3,reps:"12 each side",rest:"45s"},4:{sets:3,reps:"12 each side",rest:"45s"}},
         note: "Trains deep core stability that keeps your spine protected and posture upright under a loaded pack over uneven ground.",
         guide: "Lie on your back with arms extended toward the ceiling and knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — this is the key. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. Your lower back must stay glued to the floor throughout."
@@ -864,11 +875,26 @@ try {
   console.warn("Firebase unavailable, running in offline mode:", e);
 }
 
+const SEED_WEIGHTS = [
+  {date:"2026-05-19",weight:283.6},{date:"2026-05-21",weight:282.1},{date:"2026-05-22",weight:280.3},
+  {date:"2026-05-23",weight:279.7},{date:"2026-05-24",weight:278.6},{date:"2026-05-25",weight:280.3},
+  {date:"2026-05-26",weight:280.5},{date:"2026-05-27",weight:279.0},{date:"2026-05-28",weight:279.1},
+  {date:"2026-05-29",weight:278.2},{date:"2026-05-30",weight:278.8},{date:"2026-05-31",weight:278.2},
+  {date:"2026-06-01",weight:278.2},{date:"2026-06-02",weight:278.4},{date:"2026-06-03",weight:278.2},
+  {date:"2026-06-04",weight:277.7},{date:"2026-06-05",weight:276.8},{date:"2026-06-06",weight:276.5},
+  {date:"2026-06-07",weight:276.7},{date:"2026-06-08",weight:276.8},{date:"2026-06-09",weight:276.5},
+  {date:"2026-06-10",weight:275.4},{date:"2026-06-11",weight:275.0},{date:"2026-06-12",weight:273.2},
+  {date:"2026-06-13",weight:272.4},{date:"2026-06-14",weight:274.9},{date:"2026-06-15",weight:274.3},
+  {date:"2026-06-16",weight:273.4},{date:"2026-06-17",weight:272.0},{date:"2026-06-18",weight:271.6},
+  {date:"2026-06-19",weight:270.2},{date:"2026-06-22",weight:271.4},{date:"2026-06-23",weight:273.6},
+  {date:"2026-06-24",weight:270.8},{date:"2026-06-25",weight:269.9},{date:"2026-06-26",weight:268.5}
+];
+
 function getDefaultState() {
   return {
     currentWeek: 1,
     logs: {},
-    bodyWeight: [{ date: "2026-06-26", weight: 268.5 }],
+    bodyWeight: SEED_WEIGHTS.map(w => ({...w})),
     startDate: new Date().toISOString().split('T')[0]
   };
 }
@@ -890,10 +916,20 @@ function migrateDifficulty(st) {
   return st;
 }
 
+function migrateBodyWeight(st) {
+  if (!st.bodyWeight) st.bodyWeight = [];
+  const existing = new Set(st.bodyWeight.map(e => e.date));
+  for (const sw of SEED_WEIGHTS) {
+    if (!existing.has(sw.date)) st.bodyWeight.push({...sw});
+  }
+  st.bodyWeight.sort((a, b) => a.date.localeCompare(b.date));
+  return st;
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return migrateDifficulty(JSON.parse(saved));
+    if (saved) return migrateBodyWeight(migrateDifficulty(JSON.parse(saved)));
   } catch(e) {}
   return getDefaultState();
 }
@@ -937,7 +973,7 @@ async function syncFromCloud() {
       const localCount = Object.keys(state.logs || {}).filter(k => hasRatings(state.logs[k])).length;
 
       if (cloudCount >= localCount) {
-        state = migrateDifficulty(cloudState);
+        state = migrateBodyWeight(migrateDifficulty(cloudState));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
       } else {
@@ -998,7 +1034,7 @@ if (dbRef) {
     const localCount = Object.keys(state.logs || {}).filter(k => hasRatings(state.logs[k])).length;
 
     if (cloudCount > localCount) {
-      state = migrateDifficulty(cloudState);
+      state = migrateBodyWeight(migrateDifficulty(cloudState));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
       updateSyncUI("connected", "Live update received — " + new Date().toLocaleTimeString());
@@ -1100,10 +1136,10 @@ function renderWorkouts() {
   html += `<div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <span style="font-size:14px;font-weight:600;">Weigh-in:</span>
-      <input type="number" inputmode="decimal" class="log-input" placeholder="lbs" step="0.5" min="0"
-        style="width:80px;" value="${(log.bodyWeight || '')}"
-        onchange="logWeighIn('${logKey}', this.value)">
-      <span style="font-size:13px;color:var(--text-muted);">lbs</span>
+      <input type="number" inputmode="decimal" class="log-input" id="weighInInput-${dayKey}" placeholder="lbs" step="0.5" min="0"
+        style="width:80px;" value="${(log.bodyWeight || '')}">
+      <button class="btn-primary" style="padding:6px 14px;font-size:13px;border:none;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;"
+        onclick="logWeighIn('${logKey}', document.getElementById('weighInInput-${dayKey}').value)">Save</button>
     </div>
   </div>`;
 
@@ -1120,18 +1156,29 @@ function renderWorkouts() {
     const rx = ex.phases[phaseIdx];
     const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
 
+    const iType = ex.inputType || "weighted";
     let weightInputs = '';
     let repInputs = '';
     for (let s = 0; s < rx.sets; s++) {
       const sv = savedSets[s] || {};
-      weightInputs += `<input type="number" inputmode="decimal" class="log-input" placeholder="—" value="${sv.weight || ''}" 
-        onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">`;
-      repInputs += `<input type="number" inputmode="numeric" class="log-input" placeholder="—" value="${sv.reps || ''}" 
-        onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
+      if (iType === "weighted") {
+        weightInputs += `<input type="number" inputmode="decimal" class="log-input" placeholder="—" value="${sv.weight || ''}" 
+          onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">`;
+        repInputs += `<input type="number" inputmode="numeric" class="log-input" placeholder="—" value="${sv.reps || ''}" 
+          onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
+      } else if (iType === "timed") {
+        weightInputs += `<span class="log-input" style="display:inline-block;color:var(--text-muted);border-color:transparent;background:transparent;">—</span>`;
+        repInputs += `<input type="number" inputmode="numeric" class="log-input" placeholder="sec" value="${sv.reps || ''}" 
+          onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
+      } else {
+        weightInputs += `<span class="log-input" style="display:inline-block;color:var(--text-muted);border-color:transparent;background:transparent;">—</span>`;
+        repInputs += `<input type="number" inputmode="numeric" class="log-input" placeholder="reps" value="${sv.reps || ''}" 
+          onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">`;
+      }
       if (s < rx.sets - 1) { weightInputs += ' '; repInputs += ' '; }
     }
 
-    const startHintDesktop = (week <= 2 && ex.startWeight) ? `<div style="font-size:11px;color:var(--accent);margin-top:4px;">&#9654; Start: ${ex.startWeight}</div>` : '';
+    const startHintDesktop = (week <= 2 && ex.startWeight && iType === "weighted") ? `<div style="font-size:11px;color:var(--accent);margin-top:4px;">&#9654; Start: ${ex.startWeight}</div>` : '';
     const exAdj = getExerciseAdjustment(dayKey, week, ex.name);
     const adjHintDesktop = exAdj ? `<div class="ex-adj-hint adj-${exAdj.type === 'up' ? 'up' : exAdj.type === 'down' ? 'down' : 'same'}">${exAdj.type === 'up' ? '&#9650;' : exAdj.type === 'down' ? '&#9660;' : '&#9654;'} ${exAdj.message}</div>` : '';
     const exRating = diffObj[ex.name] || 0;
@@ -1161,23 +1208,42 @@ function renderWorkouts() {
   for (const ex of day.exercises) {
     const rx = ex.phases[phaseIdx];
     const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
+    const iTypeMobile = ex.inputType || "weighted";
 
     let setInputs = '';
     for (let s = 0; s < rx.sets; s++) {
       const sv = savedSets[s] || {};
-      setInputs += `<div class="input-group">
-        <div class="input-group-label">Set ${s + 1}</div>
-        <div class="input-pair">
-          <input type="number" inputmode="decimal" class="log-input" placeholder="lbs" value="${sv.weight || ''}" 
-            onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">
-          <span class="x-label">&times;</span>
-          <input type="number" inputmode="numeric" class="log-input" placeholder="reps" value="${sv.reps || ''}" 
-            onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">
-        </div>
-      </div>`;
+      if (iTypeMobile === "weighted") {
+        setInputs += `<div class="input-group">
+          <div class="input-group-label">Set ${s + 1}</div>
+          <div class="input-pair">
+            <input type="number" inputmode="decimal" class="log-input" placeholder="lbs" value="${sv.weight || ''}" 
+              onchange="logSet('${logKey}','${ex.name}',${s},'weight',this.value)" min="0" step="2.5">
+            <span class="x-label">&times;</span>
+            <input type="number" inputmode="numeric" class="log-input" placeholder="reps" value="${sv.reps || ''}" 
+              onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">
+          </div>
+        </div>`;
+      } else if (iTypeMobile === "timed") {
+        setInputs += `<div class="input-group">
+          <div class="input-group-label">Set ${s + 1}</div>
+          <div class="input-pair">
+            <input type="number" inputmode="numeric" class="log-input" placeholder="sec" value="${sv.reps || ''}" 
+              onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">
+          </div>
+        </div>`;
+      } else {
+        setInputs += `<div class="input-group">
+          <div class="input-group-label">Set ${s + 1}</div>
+          <div class="input-pair">
+            <input type="number" inputmode="numeric" class="log-input" placeholder="reps" value="${sv.reps || ''}" 
+              onchange="logSet('${logKey}','${ex.name}',${s},'reps',this.value)" min="0">
+          </div>
+        </div>`;
+      }
     }
 
-    const startHintMobile = (week <= 2 && ex.startWeight) ? `<div style="font-size:12px;color:var(--accent);padding:4px 0;">&#9654; Start: ${ex.startWeight}</div>` : '';
+    const startHintMobile = (week <= 2 && ex.startWeight && iTypeMobile === "weighted") ? `<div style="font-size:12px;color:var(--accent);padding:4px 0;">&#9654; Start: ${ex.startWeight}</div>` : '';
     const exAdjMobile = getExerciseAdjustment(dayKey, week, ex.name);
     const adjHintMobile = exAdjMobile ? `<div class="ex-adj-hint adj-${exAdjMobile.type === 'up' ? 'up' : exAdjMobile.type === 'down' ? 'down' : 'same'}">${exAdjMobile.type === 'up' ? '&#9650;' : exAdjMobile.type === 'down' ? '&#9660;' : '&#9654;'} ${exAdjMobile.message}</div>` : '';
     const exRatingMobile = diffObj[ex.name] || 0;
@@ -1223,25 +1289,62 @@ function changeWeek(delta) {
 }
 
 function logWeighIn(logKey, value) {
+  if (!value) return;
   if (!state.logs[logKey]) state.logs[logKey] = { difficulty: {}, sets: {}, date: new Date().toISOString().split('T')[0] };
-  state.logs[logKey].bodyWeight = value ? parseFloat(value) : null;
+  state.logs[logKey].bodyWeight = parseFloat(value);
+
+  const today = new Date().toISOString().split('T')[0];
+  if (!state.bodyWeight) state.bodyWeight = [];
+  const idx = state.bodyWeight.findIndex(e => e.date === today);
+  if (idx >= 0) {
+    state.bodyWeight[idx].weight = parseFloat(value);
+  } else {
+    state.bodyWeight.push({ date: today, weight: parseFloat(value) });
+    state.bodyWeight.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
   saveStateQuiet();
   updateCurrentWeight();
+  renderProgress();
+  showToast("Weigh-in saved: " + value + " lbs");
 }
 
 function updateCurrentWeight() {
   const el = document.getElementById("currentWeightDisplay");
   if (!el) return;
-  for (let w = 16; w >= 1; w--) {
-    for (const d of ["C","B","A"]) {
-      const log = state.logs[`W${w}-${d}`];
-      if (log && log.bodyWeight) {
-        el.textContent = log.bodyWeight + " lbs";
-        return;
-      }
-    }
+  if (state.bodyWeight && state.bodyWeight.length > 0) {
+    const latest = state.bodyWeight[state.bodyWeight.length - 1];
+    el.textContent = latest.weight + " lbs";
+    return;
   }
   el.textContent = "—";
+}
+
+function updateWeightStats() {
+  const startEl = document.getElementById("startingWeightDisplay");
+  const lossEl = document.getElementById("totalWeightLoss");
+  const pctEl = document.getElementById("weightLossPct");
+  const data = state.bodyWeight || [];
+
+  if (data.length === 0) {
+    if (startEl) startEl.textContent = "—";
+    if (lossEl) lossEl.textContent = "—";
+    if (pctEl) pctEl.textContent = "—";
+    return;
+  }
+
+  const first = data[0].weight;
+  const latest = data[data.length - 1].weight;
+  const delta = latest - first;
+  const pct = ((delta / first) * 100).toFixed(1);
+
+  if (startEl) startEl.textContent = first + " lbs";
+  if (lossEl) {
+    const sign = delta <= 0 ? '' : '+';
+    lossEl.textContent = sign + delta.toFixed(1) + " lbs";
+    lossEl.style.color = delta <= 0 ? 'var(--green)' : 'var(--red)';
+  }
+  if (pctEl) pctEl.textContent = (delta <= 0 ? '' : '+') + pct + "% Body Weight";
 }
 
 function logSet(logKey, exerciseName, setIdx, field, value) {
@@ -1289,6 +1392,96 @@ function saveStateQuiet() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   clearTimeout(_saveDebounceTimer);
   _saveDebounceTimer = setTimeout(() => pushToCloud().catch(() => {}), 2000);
+}
+
+// ========== WEIGHT CHART ==========
+function renderWeightChart() {
+  const container = document.getElementById("weightChart");
+  if (!container) return;
+  const data = (state.bodyWeight || []).filter(e => e.date && e.weight);
+  if (data.length < 2) {
+    container.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:20px 0;text-align:center;">Need at least 2 weigh-ins to show chart</div>';
+    return;
+  }
+
+  const W = container.clientWidth || 600;
+  const H = 220;
+  const pad = { top: 20, right: 16, bottom: 44, left: 48 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  const weights = data.map(d => d.weight);
+  const minW = Math.floor(Math.min(...weights) - 2);
+  const maxW = Math.ceil(Math.max(...weights) + 2);
+  const rangeW = maxW - minW || 1;
+
+  const x = (i) => pad.left + (i / (data.length - 1)) * plotW;
+  const y = (w) => pad.top + (1 - (w - minW) / rangeW) * plotH;
+
+  const points = data.map((d, i) => `${x(i).toFixed(1)},${y(d.weight).toFixed(1)}`);
+  const polyline = points.join(' ');
+  const areaPath = `M${points[0]} ${points.slice(1).map(p => `L${p}`).join(' ')} L${x(data.length - 1).toFixed(1)},${(pad.top + plotH).toFixed(1)} L${pad.left},${(pad.top + plotH).toFixed(1)} Z`;
+
+  // Y-axis labels (5 ticks)
+  const yTicks = 5;
+  let yLabels = '';
+  let gridLines = '';
+  for (let i = 0; i <= yTicks; i++) {
+    const val = minW + (rangeW * i / yTicks);
+    const yPos = y(val);
+    yLabels += `<text x="${pad.left - 8}" y="${yPos + 4}" text-anchor="end" fill="var(--text-muted)" font-size="11">${Math.round(val)}</text>`;
+    gridLines += `<line x1="${pad.left}" y1="${yPos}" x2="${W - pad.right}" y2="${yPos}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>`;
+  }
+
+  // X-axis labels (show ~6 evenly-spaced dates)
+  const xLabelCount = Math.min(6, data.length);
+  let xLabels = '';
+  for (let i = 0; i < xLabelCount; i++) {
+    const idx = Math.round(i * (data.length - 1) / (xLabelCount - 1));
+    const d = data[idx];
+    const parts = d.date.split('-');
+    const label = `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+    xLabels += `<text x="${x(idx)}" y="${H - 6}" text-anchor="middle" fill="var(--text-muted)" font-size="11">${label}</text>`;
+  }
+
+  // Dots for each data point
+  let dots = '';
+  for (let i = 0; i < data.length; i++) {
+    dots += `<circle cx="${x(i).toFixed(1)}" cy="${y(data[i].weight).toFixed(1)}" r="3" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"/>`;
+  }
+
+  // Start/end annotations
+  const first = data[0];
+  const last = data[data.length - 1];
+  const delta = (last.weight - first.weight).toFixed(1);
+  const deltaColor = delta <= 0 ? 'var(--green)' : 'var(--red)';
+  const deltaSign = delta <= 0 ? '' : '+';
+
+  let svg = `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="overflow:visible;">
+    ${gridLines}
+    <defs>
+      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    <path d="${areaPath}" fill="url(#areaGrad)"/>
+    <polyline points="${polyline}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${yLabels}
+    ${xLabels}
+    <line x1="${pad.left}" y1="${pad.top + plotH}" x2="${W - pad.right}" y2="${pad.top + plotH}" stroke="var(--border)" stroke-width="1"/>
+  </svg>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:0 4px;">
+    <div style="font-size:12px;color:var(--text-muted);">
+      <span style="font-weight:600;color:var(--text);">${first.weight}</span> lbs &rarr; <span style="font-weight:600;color:var(--text);">${last.weight}</span> lbs
+    </div>
+    <div style="font-size:13px;font-weight:600;color:${deltaColor};padding:3px 10px;border-radius:12px;background:${delta <= 0 ? 'var(--green-dim)' : 'var(--red-dim)'};">
+      ${deltaSign}${delta} lbs
+    </div>
+  </div>`;
+
+  container.innerHTML = svg;
 }
 
 // ========== PROGRESS ==========
@@ -1365,6 +1558,9 @@ function renderProgress() {
       </li>
     `).join('');
   }
+
+  renderWeightChart();
+  updateWeightStats();
 }
 
 // ========== EXERCISE GUIDE ==========
