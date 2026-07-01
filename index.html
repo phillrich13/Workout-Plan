@@ -1249,7 +1249,7 @@ function renderWorkouts() {
     const exRating = diffObj[ex.name] || 0;
     const ratingBtns = [1,2,3,4,5].map(r => {
       const cls = exRating === r ? `rated-${r}` : '';
-      return `<button class="ex-rate-btn ${cls}" onclick="rateExerciseDifficulty('${logKey}','${ex.name.replace(/'/g,"\\'")}',${r})">${r}</button>`;
+      return `<button class="ex-rate-btn ${cls}" data-rating-ex="${ex.name}" data-rating="${r}" onclick="toggleRatingUI(this)">${r}</button>`;
     }).join('');
     html += `<tr>
       <td>
@@ -1314,7 +1314,7 @@ function renderWorkouts() {
     const exRatingMobile = diffObj[ex.name] || 0;
     const ratingBtnsMobile = [1,2,3,4,5].map(r => {
       const cls = exRatingMobile === r ? `rated-${r}` : '';
-      return `<button class="ex-rate-btn ${cls}" onclick="rateExerciseDifficulty('${logKey}','${ex.name.replace(/'/g,"\\'")}',${r})">${r}</button>`;
+      return `<button class="ex-rate-btn ${cls}" data-rating-ex="${ex.name}" data-rating="${r}" onclick="toggleRatingUI(this)">${r}</button>`;
     }).join('');
     html += `<div class="exercise-card">
       <div class="exercise-card-header">
@@ -1349,7 +1349,18 @@ function renderWorkouts() {
   updateCurrentWeight();
 }
 
-let activeDay = "A";
+function getNextWorkoutDay() {
+  for (let w = 1; w <= 16; w++) {
+    for (const dk of ["A", "B", "C"]) {
+      if (!isDayComplete(`W${w}-${dk}`, dk)) {
+        state.currentWeek = w;
+        return dk;
+      }
+    }
+  }
+  return "A";
+}
+let activeDay = getNextWorkoutDay();
 function switchDay(dayKey) {
   activeDay = dayKey;
   state._editing = false;
@@ -1477,17 +1488,34 @@ function saveAllSets(logKey, dayKey) {
       if (rEl && rEl.value) sets[s].reps = parseFloat(rEl.value);
       else if (rEl && !rEl.value) sets[s].reps = null;
     }
+
+    // Collect difficulty rating from DOM
+    const ratedBtn = document.querySelector(`[data-rating-ex="${ex.name}"][class*="rated-"]`);
+    if (ratedBtn) {
+      if (typeof state.logs[logKey].difficulty !== "object" || state.logs[logKey].difficulty === null) {
+        state.logs[logKey].difficulty = {};
+      }
+      state.logs[logKey].difficulty[ex.name] = parseInt(ratedBtn.dataset.rating);
+    }
   }
 
   state._editing = false;
   saveState();
   renderWorkouts();
+  renderProgress();
   showToast("Workout saved!");
 }
 
 function unlockWorkout() {
   state._editing = true;
   renderWorkouts();
+}
+
+function toggleRatingUI(btn) {
+  const exName = btn.dataset.ratingEx;
+  const siblings = document.querySelectorAll(`[data-rating-ex="${exName}"]`);
+  siblings.forEach(b => b.className = 'ex-rate-btn');
+  btn.classList.add(`rated-${btn.dataset.rating}`);
 }
 
 function rateExerciseDifficulty(logKey, exerciseName, rating) {
@@ -1498,8 +1526,6 @@ function rateExerciseDifficulty(logKey, exerciseName, rating) {
   state.logs[logKey].difficulty[exerciseName] = rating;
   state.logs[logKey].date = new Date().toISOString().split('T')[0];
   saveStateQuiet();
-  renderWorkouts();
-  renderProgress();
 }
 
 function isDayComplete(logKey, dayKey) {
