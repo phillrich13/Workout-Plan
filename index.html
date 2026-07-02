@@ -663,7 +663,7 @@
 <script>
 // ========== PROGRAM DEFINITION ==========
 const PHASES = [
-  { name: "Foundation", weeks: [1,2,3,4], description: "Build movement patterns, joint conditioning, and baseline strength. Light weights, higher reps, focus on form." },
+  { name: "Foundation", weeks: [1,2,3,4], days: ["A","B"], description: "2 days/week — build movement patterns, joint conditioning, and baseline strength. Light weights, higher reps, focus on form and recovery." },
   { name: "Building", weeks: [5,6,7,8], description: "Increase load gradually. Moderate weight, moderate reps. Movements become more compound." },
   { name: "Strength", weeks: [9,10,11,12], description: "Heavier loads, lower rep ranges. Focus on progressive overload and strength gains." },
   { name: "Performance", weeks: [13,14,15,16], description: "Peak intensity with hiking-specific power work. Prepare for harder trails." }
@@ -707,14 +707,14 @@ const PROGRAM = {
         guide: "Sit in the leg press, place feet shoulder-width apart and HIGH on the platform (this targets glutes/hams more). Lower the weight until knees form ~90 degrees. Press through your heels to extend. Don't lock knees at the top."
       },
       {
-        name: "Dumbbell Walking Lunges",
-        video: "Pbmj6xPo-Hw",
+        name: "Stationary Reverse Lunges",
+        video: "ljZA17b52FE",
         muscle: "Quads, Glutes, Balance",
         purpose: "Why this matters for hiking",
-        startWeight: "Bodyweight or 10-15 lb dumbbells",
-        phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
-        note: "The closest gym movement to actual trail hiking — builds single-leg power and the balance you need on uneven terrain.",
-        guide: "Hold dumbbells at your sides. Take a big step forward, lower your back knee toward the floor until both knees form ~90 degree angles. Push off your front foot to step forward into the next lunge. Alternate legs. Keep your torso upright and core tight."
+        startWeight: "Bodyweight (add 10-15 lb dumbbells when ready)",
+        phases: {1:{sets:2,reps:"8 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
+        note: "Builds the same single-leg power and balance as walking lunges with more stability and less knee stress — directly trains the stepping motion for trail hiking.",
+        guide: "Stand upright with feet hip-width apart, hands at your sides (add dumbbells when bodyweight feels easy). Step one leg backward about two feet, landing on the ball of your foot. Bend both knees to lower until each forms a ~90 degree angle — back knee hovers just above the floor. Keep your torso upright and front shin vertical. Push through the heel of your front foot to return to standing. Alternate legs. Hold a machine or wall for balance if needed."
       },
       {
         name: "Dumbbell Standing Calf Raises",
@@ -982,10 +982,28 @@ function migrateBodyWeight(st) {
   return st;
 }
 
+function migrateExerciseRenames(st) {
+  const renames = {"Dumbbell Walking Lunges": "Stationary Reverse Lunges"};
+  if (!st || !st.logs) return st;
+  for (const log of Object.values(st.logs)) {
+    if (log.sets) {
+      for (const [oldName, newName] of Object.entries(renames)) {
+        if (log.sets[oldName]) { log.sets[newName] = log.sets[oldName]; delete log.sets[oldName]; }
+      }
+    }
+    if (log.difficulty && typeof log.difficulty === "object") {
+      for (const [oldName, newName] of Object.entries(renames)) {
+        if (log.difficulty[oldName] !== undefined) { log.difficulty[newName] = log.difficulty[oldName]; delete log.difficulty[oldName]; }
+      }
+    }
+  }
+  return st;
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return migrateBodyWeight(migrateDifficulty(JSON.parse(saved)));
+    if (saved) return migrateExerciseRenames(migrateBodyWeight(migrateDifficulty(JSON.parse(saved))));
   } catch(e) {}
   return getDefaultState();
 }
@@ -1035,7 +1053,7 @@ async function syncFromCloud() {
       const localCount = Object.keys(state.logs || {}).filter(k => hasRatings(state.logs[k])).length;
 
       if (cloudCount >= localCount) {
-        state = migrateBodyWeight(migrateDifficulty(cloudState));
+        state = migrateExerciseRenames(migrateBodyWeight(migrateDifficulty(cloudState)));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
       } else {
@@ -1121,6 +1139,11 @@ function getPhaseIndex(week) {
   return Math.min(Math.ceil(week / 4), 4);
 }
 
+function getActiveDays(week) {
+  const phase = getPhase(week);
+  return phase.days || ["A","B","C"];
+}
+
 function getExerciseAdjustment(dayKey, week, exerciseName) {
   const prevKey = `W${week - 1}-${dayKey}`;
   const prevLog = state.logs[prevKey];
@@ -1166,18 +1189,30 @@ function renderWorkouts() {
     <div class="day-tabs">
   `;
 
+  const activeDays = getActiveDays(week);
   for (const dk of ["A","B","C"]) {
+    const isRestDay = !activeDays.includes(dk);
     const dkLogKey = `W${week}-${dk}`;
-    const done = isDayComplete(dkLogKey, dk);
+    const done = !isRestDay && isDayComplete(dkLogKey, dk);
     const active = dk === activeDay ? "active" : "";
-    html += `<button class="day-tab ${active}" onclick="switchDay('${dk}')">
-      <span>${dayShort[dk]}</span>
-      ${done ? '<span style="color:var(--green);font-size:12px;">&#10003;</span>' : ''}
-    </button>`;
+    if (isRestDay) {
+      html += `<button class="day-tab" disabled style="opacity:0.4;cursor:default;">
+        <span>${dayShort[dk]}</span>
+        <span style="font-size:10px;color:var(--text-muted);">Rest</span>
+      </button>`;
+    } else {
+      html += `<button class="day-tab ${active}" onclick="switchDay('${dk}')">
+        <span>${dayShort[dk]}</span>
+        ${done ? '<span style="color:var(--green);font-size:12px;">&#10003;</span>' : ''}
+      </button>`;
+    }
   }
   html += `</div>`;
 
-  // Render only the active day
+  // If active day is a rest day for this phase, redirect to first active day
+  if (!activeDays.includes(activeDay)) {
+    activeDay = activeDays[0];
+  }
   const dayKey = activeDay;
   const day = PROGRAM[dayKey];
   const logKey = `W${week}-${dayKey}`;
@@ -1351,7 +1386,8 @@ function renderWorkouts() {
 
 function getNextWorkoutDay() {
   for (let w = 1; w <= 16; w++) {
-    for (const dk of ["A", "B", "C"]) {
+    const weekDays = getActiveDays(w);
+    for (const dk of weekDays) {
       if (!isDayComplete(`W${w}-${dk}`, dk)) {
         state.currentWeek = w;
         return dk;
@@ -1652,7 +1688,8 @@ function renderProgress() {
   const diffColors = ["","var(--green)","var(--green)","var(--yellow)","var(--red)","var(--red)"];
 
   for (let w = 1; w <= 16; w++) {
-    for (const d of ["A","B","C"]) {
+    const weekDays = getActiveDays(w);
+    for (const d of weekDays) {
       const key = `W${w}-${d}`;
       if (isDayComplete(key, d)) {
         completed++;
@@ -1671,14 +1708,12 @@ function renderProgress() {
 
   document.getElementById("totalWorkouts").textContent = completed;
 
-  // Streak: count consecutive weeks with at least 2 of 3 workouts done
+  // Streak: count consecutive weeks where all active days are complete
   let streak = 0;
   for (let w = state.currentWeek; w >= 1; w--) {
-    let weekCount = 0;
-    for (const d of ["A","B","C"]) {
-      if (isDayComplete(`W${w}-${d}`, d)) weekCount++;
-    }
-    if (weekCount >= 2) streak++;
+    const weekDays = getActiveDays(w);
+    const weekDone = weekDays.every(d => isDayComplete(`W${w}-${d}`, d));
+    if (weekDone) streak++;
     else break;
   }
   document.getElementById("currentStreak").textContent = streak;
@@ -1692,13 +1727,15 @@ function renderProgress() {
     const bar = document.getElementById(`phase${p}Bar`);
     const phaseWeeks = PHASES[p-1].weeks;
     let phaseDone = 0;
+    let phaseTotal = 0;
     for (const w of phaseWeeks) {
-      for (const d of ["A","B","C"]) {
+      const weekDays = getActiveDays(w);
+      phaseTotal += weekDays.length;
+      for (const d of weekDays) {
         if (isDayComplete(`W${w}-${d}`, d)) phaseDone++;
       }
     }
-    const total = phaseWeeks.length * 3;
-    bar.style.width = `${Math.round((phaseDone / total) * 100)}%`;
+    bar.style.width = `${Math.round((phaseDone / phaseTotal) * 100)}%`;
   }
 
   // History list
@@ -1765,8 +1802,8 @@ function renderGuide() {
           <td style="padding:8px 0;color:var(--text-muted);">90-135 lbs</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Walking Lunges</td>
-          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight or 10-15 lb dumbbells</td>
+          <td style="padding:8px 0;font-weight:600;">Stationary Reverse Lunges</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight (add 10-15 lb dumbbells when ready)</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Dumbbell Bench Press</td>
