@@ -55,26 +55,45 @@ Firebase initialization is wrapped in a try/catch. If the SDK scripts fail to lo
 | `B` | Wednesday | Upper Body Push + Pull | `upper` (purple) |
 | `C` | Friday | Lower Power + Upper Accessories | `full` (rose) |
 
+### Phase-Based Day Scheduling
+The Foundation phase uses only 2 workout days per week (Monday and Wednesday). Friday is displayed as a disabled "Rest" tab. All subsequent phases use all 3 days. This is controlled by:
+- `PHASES[0].days` — Array `["A","B"]` for Foundation; omitted for other phases (defaults to `["A","B","C"]`)
+- `getActiveDays(week)` — Returns the active day array for a given week
+- `renderWorkouts()`, `renderProgress()`, `getNextWorkoutDay()`, and `isDayComplete()` all use `getActiveDays()` to correctly handle workout counts, streaks, phase bars, and default-tab selection
+
 ### Four Phases (4 weeks each)
-| Phase | Weeks | Sets | Reps | Rest |
-|-------|-------|------|------|------|
-| Foundation | 1-4 | 2-3 | 12-15 | 45-60s |
-| Building | 5-8 | 3 | 10-12 | 60-75s |
-| Strength | 9-12 | 3-4 | 8-10 | 75-90s |
-| Performance | 13-16 | 3-4 | 6-8 | 90s |
+| Phase | Weeks | Days/Week | Sets | Reps | Rest |
+|-------|-------|-----------|------|------|------|
+| Foundation | 1-4 | 2 (Mon/Wed) | 2-3 | 12-15 | 45-60s |
+| Building | 5-8 | 3 | 3 | 10-12 | 60-75s |
+| Strength | 9-12 | 3 | 3-4 | 8-10 | 75-90s |
+| Performance | 13-16 | 3 | 3-4 | 6-8 | 90s |
 
 ### Adaptive Difficulty System (Per-Exercise)
-After each exercise, the user rates difficulty 1-5 via inline buttons. Ratings are stored per-exercise in the `difficulty` object (keyed by exercise name). The Exercise Guide tab includes descriptive context for each rating level (what it should feel like physically) along with the adjustment recommendation:
-- **1 (Too Easy):** Could do 5+ more reps easily → Increase weight
-- **2 (Moderate):** 2-3 reps left in the tank → Small increase (+2.5-5 lbs)
-- **3 (Just Right):** 1-2 reps left, last rep tough but clean → Repeat same weight/reps
-- **4 (Hard):** Barely finished, form breaking down → Same weight, fewer reps
-- **5 (Too Hard):** Couldn't complete all reps → Reduce weight
+After each exercise, the user rates difficulty 1-5 via inline buttons. Ratings are stored per-exercise in the `difficulty` object (keyed by exercise name). The Exercise Guide tab includes descriptive context for each rating level (what it should feel like physically) along with the adjustment recommendation.
+
+The system uses `getExerciseAdjustment(dayKey, week, exerciseName, baseRx)` to look up the previous week's difficulty rating and actual logged weights/reps, then computes concrete adjustments that are applied directly to the prescription display and weight hint:
+
+- **1 (Too Easy):** Could do 5+ more reps easily → Weight: +10 lbs from last week's max. Reps: slight drop (-2 each bound, floor 5) to accommodate the heavier load.
+- **2 (Easy):** 2-3 reps left in the tank → Weight: +5 lbs from last week's max. Reps: **no change** — the small weight increase is the progression.
+- **3 (Just Right):** 1-2 reps left, last rep tough but clean → Weight: repeat last week's max. Reps: no change.
+- **4 (Hard):** Barely finished, form breaking down → Weight: repeat last week's max. Reps: lower bound drops 2 (floor 5) to reduce volume at the same load.
+- **5 (Too Hard):** Couldn't complete all reps → Weight: -10 lbs from last week's max. Reps: drop (-3 lower, -2 upper, floor 5).
+
+**Rep adjustment mechanics** are handled by `adjustReps(baseRx, lowShift, highShift, minRep)`:
+- Parses range reps ("12-15") and single reps ("8 each leg") with any suffix
+- Applies shifts to lower and upper bounds independently, clamping to `minRep`
+- Returns `null` if the shifts produce no actual change (so the original prescription displays)
+- Minimum rep floor is 5 across all adjustments — if already at the floor, only weight changes
+
+The adjusted rep count replaces the prescription column display (e.g., "3 x 10-13" instead of "3 x 12-15"). The weight hint replaces the static "Start: X lbs" text with a specific target based on actual logged data (e.g., "▲ Try 35 lbs (+5)").
+
+**Fallback:** Week 1 or exercises without prior data show the static `startWeight` hint during weeks 1-2 and no adjustment hint otherwise.
 
 A day is "complete" when all exercises in that day have been rated. Day tab checkmarks and the Progress tab use `isDayComplete()` to check this.
 
 ### Starting Weight Guidelines
-Each exercise has a `startWeight` property. During weeks 1-2, these appear as inline hints (orange "▶ Start: X lbs") in the workout tab so the user doesn't need to flip to the guide.
+Each exercise has a `startWeight` property. During weeks 1-2 (and only when no adaptive adjustment is available), these appear as inline hints (orange "▶ Start: X lbs") in the workout tab so the user doesn't need to flip to the guide. Once adaptive data exists, the specific weight target from `getExerciseAdjustment()` replaces this hint.
 
 ### Exercise Input Types
 Each exercise has an optional `inputType` field:
@@ -119,6 +138,7 @@ Each exercise has an optional `inputType` field:
 **Migration functions** (run on every `loadState` and cloud sync):
 - `migrateDifficulty()` — Converts old numeric `difficulty` (single rating per day) to per-exercise object format
 - `migrateBodyWeight()` — Merges `SEED_WEIGHTS` (36 historical weigh-ins) into `state.bodyWeight`, deduplicating by date
+- `migrateExerciseRenames()` — Renames exercise keys in `sets` and `difficulty` objects across all logs when exercises are swapped out. Current rename map: `"Dumbbell Walking Lunges"` → `"Stationary Reverse Lunges"`
 
 ---
 
@@ -131,16 +151,30 @@ Each exercise has an optional `inputType` field:
 
 ### Workout Tab Details
 - **Week navigation** with prev/next buttons (weeks 1-16)
-- **Day sub-tabs** (Mon | Wed | Fri) with checkmarks for completed days
-- **Weigh-in input** on every workout day
+- **Day sub-tabs** (Mon | Wed | Fri) with checkmarks for completed days; Foundation phase shows Friday as a disabled "Rest" tab
+- **Default tab:** On load, `getNextWorkoutDay()` finds the earliest incomplete workout across all active weeks/days and defaults to that day/week
+- **Weigh-in input** on every workout day with a dedicated Save button (does not auto-save on change)
+- **Prescription column** — Displays the base phase prescription adjusted by `getExerciseAdjustment()` when prior data exists (e.g., "3 x 10-13" instead of static "3 x 12-15")
+- **Weight hint** — Below each exercise name, shows either the adaptive weight target (e.g., "▲ Try 35 lbs (+5)") or the static starting weight guide (weeks 1-2 only, when no prior data)
 - **Desktop layout:** Table with exercise name, prescription, weight inputs, rep inputs
 - **Mobile layout:** Card-based layout with set-by-set inputs (lbs × reps per set)
-- **Per-exercise difficulty rating** buttons (1-5) inline with each exercise, with per-exercise adjustment hints
+- **Per-exercise difficulty rating** buttons (1-5) inline with each exercise — clicking a rating only updates the visual highlight via `toggleRatingUI()`, no save or re-render
 - Desktop table and mobile cards are toggled via CSS media query at 600px breakpoint
 
+### Save/Edit Workout Flow
+All inputs (weights, reps, difficulty ratings, weigh-in) are collected and saved together via a single **"Save Workout"** button at the bottom of the day card:
+
+1. **Editing state:** Inputs are editable, difficulty buttons are clickable, "Save Workout" button is shown
+2. **Save:** `saveAllSets(logKey, dayKey)` collects all visible input values (using `data-ex`, `data-set`, `data-field` attributes) and difficulty ratings (using `data-rating-ex`, `data-rating` attributes), writes to `state.logs`, calls `saveState()`, and re-renders
+3. **Locked state:** After saving, all inputs become `readonly` with reduced opacity and `pointer-events: none`. The button changes to **"Edit Workout"**
+4. **Unlock:** Clicking "Edit Workout" calls `unlockWorkout()` which sets `state._editing = true` and re-renders with editable inputs
+
+The `_editing` flag is a transient UI state — it's stripped from the state object by `stateForStorage()` before saving to localStorage or Firebase. The `locked` flag in `renderWorkouts()` is derived from `hasSavedSets && !state._editing`.
+
 ### Profile Card
-- Starting Weight (dynamic — earliest entry in `state.bodyWeight` array)
-- Current Weight (most recent entry in `state.bodyWeight` array)
+- Starting Weight (dynamic — earliest entry in `state.bodyWeight` array) with date subtext
+- Current Weight (most recent entry in `state.bodyWeight` array) with date subtext
+- Total Weight Loss card with percentage of body weight (negative for loss, positive for gain)
 - Current Week
 
 ### Action Bar
@@ -279,9 +313,20 @@ When the user logs a weigh-in via the Save button on any workout day:
 
 1. **Planet Fitness equipment only** — No barbells, no squat racks, no power racks, no Smith machines. Program uses cables, dumbbells (up to 75 lb), and plate-loaded machines only.
 2. **Firebase auth is open** — The database has public read/write rules. Acceptable for a single-user personal project but would need auth if shared.
-3. **Single-file architecture** — All ~1,790 lines live in one HTML file. If the app grows significantly, consider splitting into separate CSS/JS files.
+3. **Single-file architecture** — All ~2,000+ lines live in one HTML file. If the app grows significantly, consider splitting into separate CSS/JS files.
 4. **Corporate proxy** — GitHub Pages works fine, but any backend that requires cross-origin requests to Google domains may be blocked by Zscaler on the user's work network.
 5. **Weight data source** — Historical weigh-ins were extracted from `/Users/prichardson2/Documents/apple_health_export/export.xml` (Apple Health → Withings scale records). Future imports would need the same XML parsing approach.
+
+### Exercise Swap History
+Exercises have been replaced over time as the user's needs evolved. When swapping exercises, add entries to the `renames` map in `migrateExerciseRenames()` so historical log data carries over automatically.
+
+| Original Exercise | Replacement | Reason |
+|---|---|---|
+| Smith Machine Squat | Dumbbell Sumo Squat | No Smith machine access |
+| Smith Machine Romanian Deadlift | Dumbbell Romanian Deadlift | No Smith machine access |
+| Smith Machine Bench Press | Dumbbell Bench Press (Flat) | No Smith machine access |
+| Smith Machine Calf Raises | Dumbbell Standing Calf Raises | No Smith machine access |
+| Dumbbell Walking Lunges | Stationary Reverse Lunges | User found walking lunges too difficult at current body weight — reverse lunges train the same muscles with more stability and less knee stress |
 
 ---
 

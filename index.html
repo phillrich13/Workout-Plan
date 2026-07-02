@@ -1144,24 +1144,85 @@ function getActiveDays(week) {
   return phase.days || ["A","B","C"];
 }
 
-function getExerciseAdjustment(dayKey, week, exerciseName) {
+function adjustReps(baseRx, lowShift, highShift, minRep) {
+  if (!baseRx) return null;
+  const repsStr = String(baseRx.reps);
+  const suffix = repsStr.replace(/[\d\s-]+/, '').trim();
+  const nums = repsStr.match(/\d+/g);
+  if (!nums) return null;
+  if (nums.length >= 2) {
+    const lo = Math.max(parseInt(nums[0]) + lowShift, minRep);
+    const hi = Math.max(parseInt(nums[1]) + highShift, lo);
+    if (lo === parseInt(nums[0]) && hi === parseInt(nums[1])) return null;
+    return lo + "-" + hi + (suffix ? " " + suffix : "");
+  }
+  const single = Math.max(parseInt(nums[0]) + lowShift, minRep);
+  if (single === parseInt(nums[0])) return null;
+  return single + (suffix ? " " + suffix : "");
+}
+
+function getExerciseAdjustment(dayKey, week, exerciseName, baseRx) {
   const prevKey = `W${week - 1}-${dayKey}`;
   const prevLog = state.logs[prevKey];
   if (!prevLog || typeof prevLog.difficulty !== "object" || !prevLog.difficulty) return null;
   const diff = prevLog.difficulty[exerciseName];
   if (!diff) return null;
 
+  const prevSets = (prevLog.sets && prevLog.sets[exerciseName]) ? prevLog.sets[exerciseName] : [];
+  const prevWeights = prevSets.map(s => parseFloat(s.weight) || 0).filter(w => w > 0);
+  const prevMaxWeight = prevWeights.length ? Math.max(...prevWeights) : 0;
+
+  let weightAdj = null;
+  let repsAdj = null;
+  let message = "";
+  let type = "same";
+
   if (diff <= 1) {
-    return { type: "up", message: "Too easy last week — increase 5-10 lbs" };
+    type = "up";
+    repsAdj = adjustReps(baseRx, -2, -2, 5);
+    if (prevMaxWeight > 0) {
+      weightAdj = Math.ceil((prevMaxWeight + 10) / 2.5) * 2.5;
+      message = `Increase to ${weightAdj} lbs`;
+    } else {
+      message = "Add weight — too easy last week";
+    }
   } else if (diff === 2) {
-    return { type: "up", message: "Good last week — try +2.5-5 lbs" };
+    type = "up";
+    if (prevMaxWeight > 0) {
+      weightAdj = Math.ceil((prevMaxWeight + 5) / 2.5) * 2.5;
+      message = `Try ${weightAdj} lbs (+5)`;
+    } else {
+      message = "Try adding light weight";
+    }
   } else if (diff === 3) {
-    return { type: "same", message: "Right on target — repeat same weight" };
+    type = "same";
+    if (prevMaxWeight > 0) {
+      weightAdj = prevMaxWeight;
+      message = `Repeat ${weightAdj} lbs`;
+    } else {
+      message = "Repeat same weight";
+    }
   } else if (diff === 4) {
-    return { type: "down", message: "Tough last week — same weight, fewer reps" };
+    type = "down";
+    repsAdj = adjustReps(baseRx, -2, 0, 5);
+    if (prevMaxWeight > 0) {
+      weightAdj = prevMaxWeight;
+      message = `Keep ${weightAdj} lbs, aim for fewer reps`;
+    } else {
+      message = "Same weight, reduce reps";
+    }
   } else {
-    return { type: "down", message: "Too hard — reduce 5-10 lbs" };
+    type = "down";
+    repsAdj = adjustReps(baseRx, -3, -2, 5);
+    if (prevMaxWeight > 0) {
+      const dropped = Math.max(Math.floor((prevMaxWeight - 10) / 2.5) * 2.5, 0);
+      weightAdj = dropped;
+      message = dropped > 0 ? `Drop to ${dropped} lbs` : "Drop to bodyweight";
+    } else {
+      message = "Reduce weight or stick to bodyweight";
+    }
   }
+  return { type, message, weightAdj, repsAdj };
 }
 
 // ========== RENDER FUNCTIONS ==========
@@ -1278,9 +1339,15 @@ function renderWorkouts() {
       if (s < rx.sets - 1) { weightInputs += ' '; repInputs += ' '; }
     }
 
-    const startHintDesktop = (week <= 2 && ex.startWeight && iType === "weighted") ? `<div style="font-size:11px;color:var(--accent);margin-top:4px;">&#9654; Start: ${ex.startWeight}</div>` : '';
-    const exAdj = getExerciseAdjustment(dayKey, week, ex.name);
-    const adjHintDesktop = exAdj ? `<div class="ex-adj-hint adj-${exAdj.type === 'up' ? 'up' : exAdj.type === 'down' ? 'down' : 'same'}">${exAdj.type === 'up' ? '&#9650;' : exAdj.type === 'down' ? '&#9660;' : '&#9654;'} ${exAdj.message}</div>` : '';
+    const exAdj = getExerciseAdjustment(dayKey, week, ex.name, rx);
+    const displayReps = (exAdj && exAdj.repsAdj) ? exAdj.repsAdj : rx.reps;
+    let weightHintDesktop = '';
+    if (exAdj && iType === "weighted") {
+      const arrow = exAdj.type === 'up' ? '&#9650;' : exAdj.type === 'down' ? '&#9660;' : '&#9654;';
+      weightHintDesktop = `<div class="ex-adj-hint adj-${exAdj.type}">${arrow} ${exAdj.message}</div>`;
+    } else if (week <= 2 && ex.startWeight && iType === "weighted") {
+      weightHintDesktop = `<div style="font-size:11px;color:var(--accent);margin-top:4px;">&#9654; Start: ${ex.startWeight}</div>`;
+    }
     const exRating = diffObj[ex.name] || 0;
     const ratingBtns = [1,2,3,4,5].map(r => {
       const cls = exRating === r ? `rated-${r}` : '';
@@ -1289,14 +1356,13 @@ function renderWorkouts() {
     html += `<tr>
       <td>
         <div class="exercise-name">${ex.name}</div>
-        ${startHintDesktop}
-        ${adjHintDesktop}
+        ${weightHintDesktop}
         <div class="ex-rating">
           <span class="ex-rating-label">Rate:</span>
           ${ratingBtns}
         </div>
       </td>
-      <td>${rx.sets} x ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
+      <td>${rx.sets} x ${displayReps}<br><span style="font-size:11px;color:var(--text-muted);">Rest: ${rx.rest}</span></td>
       <td>${weightInputs}</td>
       <td>${repInputs}</td>
     </tr>`;
@@ -1343,9 +1409,15 @@ function renderWorkouts() {
       }
     }
 
-    const startHintMobile = (week <= 2 && ex.startWeight && iTypeMobile === "weighted") ? `<div style="font-size:12px;color:var(--accent);padding:4px 0;">&#9654; Start: ${ex.startWeight}</div>` : '';
-    const exAdjMobile = getExerciseAdjustment(dayKey, week, ex.name);
-    const adjHintMobile = exAdjMobile ? `<div class="ex-adj-hint adj-${exAdjMobile.type === 'up' ? 'up' : exAdjMobile.type === 'down' ? 'down' : 'same'}">${exAdjMobile.type === 'up' ? '&#9650;' : exAdjMobile.type === 'down' ? '&#9660;' : '&#9654;'} ${exAdjMobile.message}</div>` : '';
+    const exAdjMobile = getExerciseAdjustment(dayKey, week, ex.name, rx);
+    const displayRepsMobile = (exAdjMobile && exAdjMobile.repsAdj) ? exAdjMobile.repsAdj : rx.reps;
+    let weightHintMobile = '';
+    if (exAdjMobile && iTypeMobile === "weighted") {
+      const arrow = exAdjMobile.type === 'up' ? '&#9650;' : exAdjMobile.type === 'down' ? '&#9660;' : '&#9654;';
+      weightHintMobile = `<div class="ex-adj-hint adj-${exAdjMobile.type}">${arrow} ${exAdjMobile.message}</div>`;
+    } else if (week <= 2 && ex.startWeight && iTypeMobile === "weighted") {
+      weightHintMobile = `<div style="font-size:12px;color:var(--accent);padding:4px 0;">&#9654; Start: ${ex.startWeight}</div>`;
+    }
     const exRatingMobile = diffObj[ex.name] || 0;
     const ratingBtnsMobile = [1,2,3,4,5].map(r => {
       const cls = exRatingMobile === r ? `rated-${r}` : '';
@@ -1356,10 +1428,9 @@ function renderWorkouts() {
         <div>
           <div class="exercise-name">${ex.name}</div>
           <span class="muscle-tag">${ex.muscle}</span>
-          ${startHintMobile}
-          ${adjHintMobile}
+          ${weightHintMobile}
         </div>
-        <div class="exercise-card-rx">${rx.sets} &times; ${rx.reps}<br><span style="font-size:11px;color:var(--text-muted);font-weight:400;">Rest: ${rx.rest}</span></div>
+        <div class="exercise-card-rx">${rx.sets} &times; ${displayRepsMobile}<br><span style="font-size:11px;color:var(--text-muted);font-weight:400;">Rest: ${rx.rest}</span></div>
       </div>
       <div class="exercise-card-inputs">${setInputs}</div>
       <div class="ex-rating" style="padding:4px 0;">
