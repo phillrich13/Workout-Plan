@@ -14,7 +14,7 @@ A self-contained, single-file HTML strength training dashboard for a user return
 
 - **Height:** 5'10", **Starting Weight:** 268.5 lbs
 - **Current activity:** Walking 3-4 mi 5x/week, hiking 4-8 mi on Saturdays
-- **Gym access:** Planet Fitness (cables, dumbbells up to 75 lb, plate-loaded machines — no free barbells/squat racks/Smith machines)
+- **Gym access:** Home gym (Bowflex SelectTech 552 dumbbells 5-52.5 lb, FLYBIRD adjustable bench, Bodylastics resistance bands with door anchor, step platform, pull-up bar, floor mat)
 - **Goals:**
   - **Lower body:** Strength for hiking harder trails
   - **Upper body:** Aesthetic physique
@@ -327,6 +327,14 @@ Exercises have been replaced over time as the user's needs evolved. When swappin
 | Smith Machine Bench Press | Dumbbell Bench Press (Flat) | No Smith machine access |
 | Smith Machine Calf Raises | Dumbbell Standing Calf Raises | No Smith machine access |
 | Dumbbell Walking Lunges | Stationary Reverse Lunges | User found walking lunges too difficult at current body weight — reverse lunges train the same muscles with more stability and less knee stress |
+| Leg Press Machine | Dumbbell Bulgarian Split Squats | Transition to home gym — no leg press machine available |
+| Seated Cable Row | Band Seated Row | Transition to home gym — cables replaced with resistance bands |
+| Lat Pulldown Machine | Band Lat Pulldown | Transition to home gym — machine replaced with bands + door anchor |
+| Cable Face Pulls | Band Face Pulls | Transition to home gym — cables replaced with resistance bands |
+| Tricep Pushdowns (Cable) | Band Tricep Pushdowns | Transition to home gym — cables replaced with resistance bands |
+| Leg Curl Machine | Dumbbell Lying Leg Curls | Transition to home gym — machine replaced with dumbbell + bench |
+| Cable Chest Flyes | Band Chest Flyes | Transition to home gym — cables replaced with resistance bands |
+| Cable Woodchops | Band Woodchops | Transition to home gym — cables replaced with resistance bands |
 
 ---
 
@@ -334,7 +342,9 @@ Exercises have been replaced over time as the user's needs evolved. When swappin
 
 ```
 Workout-Plan/
-├── index.html      # The entire application (HTML + CSS + JS)
-├── README.md       # Public-facing readme
-└── HANDOFF.md      # This file
+├── index.html                     # The entire application (HTML + CSS + JS)
+├── README.md                      # Public-facing readme
+├── HANDOFF.md                     # This file
+├── home_gym_shopping_list.py      # Script that generates the home gym shopping list Excel
+└── Home_Gym_Shopping_List.xlsx    # Generated shopping list with prices and equipment map
 ```

@@ -669,7 +669,7 @@ const PHASES = [
   { name: "Performance", weeks: [13,14,15,16], description: "Peak intensity with hiking-specific power work. Prepare for harder trails." }
 ];
 
-// Planet Fitness equipment: machines, dumbbells (up to 75lb), cables, bodyweight
+// Home gym: Bowflex SelectTech 552 dumbbells, adjustable bench, resistance bands w/ door anchor, pull-up bar, step platform
 const PROGRAM = {
   // DAY A: Lower Body + Core (hiking priority)
   A: {
@@ -697,14 +697,14 @@ const PROGRAM = {
         guide: "Stand with feet hip-width apart, holding a dumbbell in each hand in front of your thighs with palms facing you. With a slight bend in your knees (keep them fixed), hinge at the hips pushing your butt back. Lower the dumbbells along your thighs until you feel a deep hamstring stretch (mid-shin area). Squeeze glutes to return to standing. The dumbbells will naturally hang closer to your body than a bar — let them track along your legs."
       },
       {
-        name: "Leg Press Machine",
-        video: "p5dCqF7wWUw",
-        muscle: "Quads, Glutes",
+        name: "Dumbbell Bulgarian Split Squats",
+        video: "4tKKxQy_D98",
+        muscle: "Quads, Glutes, Balance",
         purpose: "Why this matters for hiking",
-        startWeight: "90-135 lbs",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
-        note: "Heavy compound leg strength that translates directly to sustained power on long inclines and multi-mile elevation gains.",
-        guide: "Sit in the leg press, place feet shoulder-width apart and HIGH on the platform (this targets glutes/hams more). Lower the weight until knees form ~90 degrees. Press through your heels to extend. Don't lock knees at the top."
+        startWeight: "Bodyweight (add 10-15 lb dumbbells when ready)",
+        phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"75s"},3:{sets:3,reps:"12 each leg",rest:"90s"},4:{sets:3,reps:"12 each leg",rest:"90s"}},
+        note: "Heavy single-leg strength that translates directly to sustained power on long inclines — trains each leg independently to fix imbalances.",
+        guide: "Stand 2-3 feet in front of your bench, back to it. Place the top of your rear foot on the bench. Hold a dumbbell in each hand at your sides. Lower your hips until your front thigh is near parallel, back knee hovering above the floor. Push through your front heel to stand. Keep torso upright, chest up. Complete all reps on one leg before switching."
       },
       {
         name: "Stationary Reverse Lunges",
@@ -727,14 +727,14 @@ const PROGRAM = {
         guide: "Hold a dumbbell in each hand at your sides. Stand on a step or weight plate with just the balls of your feet, heels hanging off the edge. Lower your heels below the step for a full stretch, then rise up onto your toes as high as possible. Pause at the top for 1 second. If balance is an issue, hold one dumbbell and use your free hand on a wall or machine for support."
       },
       {
-        name: "Cable Woodchops",
-        video: "gVtsBWJz6N4",
+        name: "Band Woodchops",
+        video: "Yp2DmHk3KnY",
         muscle: "Core, Obliques",
         purpose: "Why this matters for hiking",
-        startWeight: "15-25 lbs",
+        startWeight: "Light-medium band",
         phases: {1:{sets:2,reps:"12 each side",rest:"45s"},2:{sets:3,reps:"12 each side",rest:"45s"},3:{sets:3,reps:"10 each side",rest:"60s"},4:{sets:3,reps:"10 each side",rest:"60s"}},
         note: "Rotational core power keeps you stable when navigating roots, rocks, and off-camber trail sections with a loaded pack.",
-        guide: "Set cable at highest position. Stand sideways to the machine, grab handle with both hands. Pull the cable diagonally across your body from high to low, rotating your torso. Control the weight back up. Keep arms relatively straight — the rotation comes from your core, not your arms."
+        guide: "Anchor the band high on a door anchor. Stand sideways to the door, grab both ends of the band with both hands. Pull the band diagonally across your body from high to low, rotating your torso. Control the return. Keep arms relatively straight — the rotation comes from your core, not your arms. Step further from the door for more resistance."
       },
       {
         name: "Plank Hold",
@@ -765,14 +765,14 @@ const PROGRAM = {
         guide: "Lie flat on a bench with a dumbbell in each hand at chest level, palms facing forward. Press the dumbbells up until arms are fully extended, bringing them slightly together at the top without clanking. Lower slowly (2-3 seconds) until your elbows are just below bench level — this deeper range of motion is the advantage over a barbell. Keep your feet flat on the floor and maintain a slight natural arch in your lower back."
       },
       {
-        name: "Seated Cable Row",
-        video: "GZbfZ033f74",
+        name: "Band Seated Row",
+        video: "LSkyinhmA8k",
         muscle: "Mid Back, Lats, Biceps",
         purpose: "How this builds your physique",
-        startWeight: "40-60 lbs",
+        startWeight: "Medium band",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
         note: "Widens your back and improves posture, creating the V-taper silhouette that makes your waist look narrower.",
-        guide: "Sit at the cable row station with feet on the platform, slight bend in knees. Grab the handle, sit tall with chest up. Pull the handle to your lower chest/upper abdomen, squeezing your shoulder blades together hard at the end. Slowly return to the start with arms extended. Don't round your back."
+        guide: "Sit on the floor with legs extended, slight bend in knees. Loop the band around the soles of your feet (wrap an extra time for security). Sit tall with chest up. Pull the handles to your lower chest, squeezing your shoulder blades together hard at the end. Slowly extend arms back. Don't round your back. Step further from the anchor or double up bands for more resistance."
       },
       {
         name: "Dumbbell Overhead Press (Seated)",
@@ -785,14 +785,14 @@ const PROGRAM = {
         guide: "Sit on a bench with back support set to ~85 degrees (almost vertical). Hold dumbbells at shoulder height, palms facing forward. Press them up until arms are fully extended overhead. Lower back to shoulder height with control. Don't arch your lower back excessively."
       },
       {
-        name: "Lat Pulldown Machine",
-        video: "SALxEARiMkw",
+        name: "Band Lat Pulldown",
+        video: "8vGCZsoeP_4",
         muscle: "Lats, Upper Back, Biceps",
         purpose: "How this builds your physique",
-        startWeight: "50-70 lbs",
+        startWeight: "Medium-heavy band",
         phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
         note: "Builds lat width for a wider V-taper — the single biggest contributor to an athletic-looking upper body.",
-        guide: "Sit at the lat pulldown, grip the bar wider than shoulder-width. Lean back slightly (~15 degrees), pull the bar down to your upper chest, driving your elbows down and back. Squeeze your lats at the bottom. Control the weight back up — don't let it yank you."
+        guide: "Anchor the band to the top of a door using the door anchor, or loop it over your pull-up bar. Kneel facing the anchor, grab one end of the band in each hand with arms extended overhead. Retract and depress your shoulder blades first, then drive your elbows down and outward until hands reach shoulder height. Squeeze your lats at the bottom. Slowly return to start with control."
       },
       {
         name: "Dumbbell Incline Press",
@@ -805,14 +805,14 @@ const PROGRAM = {
         guide: "Set an adjustable bench to 30-45 degrees. Lie back with dumbbells at chest level, palms forward. Press the dumbbells up and slightly toward each other (without clanking). Lower slowly until you feel a stretch across your upper chest."
       },
       {
-        name: "Cable Face Pulls",
-        video: "0Po47vvj9g4",
+        name: "Band Face Pulls",
+        video: "Wq-Td9UXRK8",
         muscle: "Rear Delts, Rotator Cuff",
         purpose: "How this builds your physique",
-        startWeight: "15-25 lbs",
+        startWeight: "Light-medium band",
         phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"12-15",rest:"45s"},4:{sets:3,reps:"12-15",rest:"45s"}},
         note: "Balances out all the pressing work, prevents rounded shoulders, and builds the rear delt definition that makes shoulders look 3D.",
-        guide: "Set cable at face height with a rope attachment. Step back to create tension. Pull the rope toward your face, splitting the rope ends to either side of your head. Squeeze your rear delts and hold for 1 second. Keep elbows high throughout the movement. Go light — this is about muscle activation, not heavy weight."
+        guide: "Anchor the band at face height on a door anchor. Step back until the band is taut. Grab both ends, pull toward your face with elbows high and parallel to the ground. Squeeze your shoulder blades together and hold for 1 second. Return with control. Keep elbows high throughout. Go light — this is about muscle activation, not heavy resistance."
       },
       {
         name: "Dumbbell Bicep Curls",
@@ -825,14 +825,14 @@ const PROGRAM = {
         guide: "Stand with dumbbells at your sides, palms facing forward. Curl the weight up by bending at the elbow only — your upper arm should not move. Squeeze at the top, then lower slowly (3 seconds down). Don't swing your body or use momentum."
       },
       {
-        name: "Tricep Pushdowns (Cable)",
-        video: "2-LAMcpzODU",
+        name: "Band Tricep Pushdowns",
+        video: "AlTGQrDOd98",
         muscle: "Triceps",
         purpose: "How this builds your physique",
-        startWeight: "20-30 lbs",
+        startWeight: "Light-medium band",
         phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
         note: "Triceps make up two-thirds of your arm size — this is the key to arms that fill out your sleeves.",
-        guide: "Attach a rope or straight bar to the high cable. Stand facing the machine, grip the attachment, pin your elbows to your sides. Push the weight down until your arms are fully extended. Squeeze your triceps at the bottom. Slowly return to the start. Your elbows should not move forward or backward."
+        guide: "Anchor the band high on a door anchor or loop over the pull-up bar. Face the anchor, grab both ends with a firm grip, pin your elbows to your sides. Push down until your arms are fully extended. Squeeze your triceps at the bottom and hold for 1 second. Slowly return to the start. Elbows stay pinned — don't let them drift forward."
       }
     ]
   },
@@ -862,14 +862,14 @@ const PROGRAM = {
         guide: "Hold dumbbells at your sides. Place one foot fully on a bench. Drive through that heel to step up, bringing the other foot up to the bench. Step back down with the trailing leg first. Complete all reps on one leg before switching. Don't push off the bottom foot — make the top leg do the work."
       },
       {
-        name: "Leg Curl Machine",
-        video: "T5b-A46ln3Q",
+        name: "Dumbbell Lying Leg Curls",
+        video: "4tKKxQy_D98",
         muscle: "Hamstrings",
         purpose: "Why this matters for hiking",
-        startWeight: "40-60 lbs",
+        startWeight: "5-10 lb dumbbell",
         phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:4,reps:"8-10",rest:"60s"}},
         note: "Strong hamstrings act as brakes on steep descents, protecting your knees from the pounding of long downhill sections.",
-        guide: "Lie face down on the machine, pad behind your ankles. Curl your heels toward your glutes. Squeeze at the top for 1 second. Lower slowly (3 seconds). Don't let the weight stack slam at the bottom."
+        guide: "Lie face down on the bench with legs hanging off the end past the knees. Secure a dumbbell between your feet by squeezing them together around the handle. Keep hips pressed into the bench. Curl the dumbbell toward your glutes by bending your knees. Squeeze hamstrings at the top for 1 second. Lower slowly (3 seconds). Start light — securing the dumbbell between your feet takes practice."
       },
       {
         name: "Dumbbell Lateral Raises",
@@ -882,14 +882,14 @@ const PROGRAM = {
         guide: "Stand with dumbbells at your sides. Lean forward slightly at the hips (~10 degrees). Raise the dumbbells out to your sides until arms are parallel to the floor (like a T). Lead with your elbows, not your hands. Lower slowly. Use lighter weight than you think — 10-15 lbs is plenty for most people starting out."
       },
       {
-        name: "Cable Chest Flyes",
-        video: "Iwe6AmxVf7o",
+        name: "Band Chest Flyes",
+        video: "JIRDO1fvd-g",
         muscle: "Chest",
         purpose: "How this builds your physique",
-        startWeight: "10-20 lbs per side",
+        startWeight: "Light-medium band",
         phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
         note: "Isolates the chest for deeper muscle activation and builds the inner-chest definition that pressing alone can't create.",
-        guide: "Set both cables at chest height. Stand in the center with one foot forward for balance. Grab both handles, arms wide with a slight bend in elbows. Bring your hands together in front of your chest in a hugging motion. Squeeze your chest for 1 second. Open back up slowly with control."
+        guide: "Anchor the band at chest height on a door anchor behind you. Face away from the door in a staggered stance, one foot forward for balance. Grab both handles, arms wide with a slight bend in elbows. Sweep your hands together in front of your chest like hugging a barrel. Squeeze your chest for 1 second. Open back up slowly with control — don't let the band yank you back."
       },
       {
         name: "Dumbbell Shrugs",
@@ -983,7 +983,17 @@ function migrateBodyWeight(st) {
 }
 
 function migrateExerciseRenames(st) {
-  const renames = {"Dumbbell Walking Lunges": "Stationary Reverse Lunges"};
+  const renames = {
+    "Dumbbell Walking Lunges": "Stationary Reverse Lunges",
+    "Leg Press Machine": "Dumbbell Bulgarian Split Squats",
+    "Cable Woodchops": "Band Woodchops",
+    "Seated Cable Row": "Band Seated Row",
+    "Lat Pulldown Machine": "Band Lat Pulldown",
+    "Cable Face Pulls": "Band Face Pulls",
+    "Tricep Pushdowns (Cable)": "Band Tricep Pushdowns",
+    "Leg Curl Machine": "Dumbbell Lying Leg Curls",
+    "Cable Chest Flyes": "Band Chest Flyes"
+  };
   if (!st || !st.logs) return st;
   for (const log of Object.values(st.logs)) {
     if (log.sets) {
@@ -1869,8 +1879,8 @@ function renderGuide() {
           <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbells</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Leg Press</td>
-          <td style="padding:8px 0;color:var(--text-muted);">90-135 lbs</td>
+          <td style="padding:8px 0;font-weight:600;">Bulgarian Split Squats</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight (add 10-15 lb dumbbells when ready)</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Stationary Reverse Lunges</td>
@@ -1881,32 +1891,48 @@ function renderGuide() {
           <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbells</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Cable Rows</td>
-          <td style="padding:8px 0;color:var(--text-muted);">40-60 lbs</td>
+          <td style="padding:8px 0;font-weight:600;">Band Seated Row</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Medium band</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Overhead Press</td>
           <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbells</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Lat Pulldown</td>
-          <td style="padding:8px 0;color:var(--text-muted);">50-70 lbs</td>
+          <td style="padding:8px 0;font-weight:600;">Band Lat Pulldown</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Medium-heavy band</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Lateral Raises</td>
           <td style="padding:8px 0;color:var(--text-muted);">10-15 lb dumbbells</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Curls / Pushdowns</td>
-          <td style="padding:8px 0;color:var(--text-muted);">10-20 lbs</td>
+          <td style="padding:8px 0;font-weight:600;">Curls / Band Pushdowns</td>
+          <td style="padding:8px 0;color:var(--text-muted);">10-20 lb dumbbells / Light-medium band</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Sumo Squat</td>
           <td style="padding:8px 0;color:var(--text-muted);">30-40 lb dumbbell</td>
         </tr>
-        <tr>
+        <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Calf Raises</td>
           <td style="padding:8px 0;color:var(--text-muted);">25-40 lb dumbbells</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Lying Leg Curls</td>
+          <td style="padding:8px 0;color:var(--text-muted);">5-10 lb dumbbell</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Band Woodchops</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Light-medium band</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Band Face Pulls</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Light-medium band</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;font-weight:600;">Band Chest Flyes</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Light-medium band</td>
         </tr>
       </table>
       <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">
