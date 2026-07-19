@@ -1028,28 +1028,45 @@ function migrateExerciseRenames(st) {
   const renames = {
     "Dumbbell Walking Lunges": "Stationary Reverse Lunges"
   };
-  // Exercises that were replaced with a fundamentally different movement —
-  // old weight/difficulty data is not applicable, so purge it
   const purge = [
     "Leg Press Machine", "Cable Woodchops", "Seated Cable Row",
     "Lat Pulldown Machine", "Cable Face Pulls", "Tricep Pushdowns (Cable)",
     "Band Tricep Pushdowns", "Leg Curl Machine", "Cable Chest Flyes"
   ];
+  // One-time cleanup: previous migration renamed gym exercises to home
+  // replacements, carrying over wrong weights. Only purge from PAST weeks
+  // to preserve any current-week data the user already logged.
+  const homeGymPurge = [
+    "Dumbbell Bulgarian Split Squats", "Band Woodchops", "Band Seated Row",
+    "Band Lat Pulldown", "Band Face Pulls", "Dumbbell Skull Crushers",
+    "Dumbbell Lying Leg Curls", "Band Chest Flyes"
+  ];
   if (!st || !st.logs) return st;
-  for (const log of Object.values(st.logs)) {
+  const needsHomeGymClean = !st._homeGymMigrated;
+  const curWeek = st.currentWeek || 1;
+  for (const [logKey, log] of Object.entries(st.logs)) {
+    const weekMatch = logKey.match(/^W(\d+)/);
+    const logWeek = weekMatch ? parseInt(weekMatch[1]) : 0;
     if (log.sets) {
       for (const [oldName, newName] of Object.entries(renames)) {
         if (log.sets[oldName]) { log.sets[newName] = log.sets[oldName]; delete log.sets[oldName]; }
       }
       for (const old of purge) { delete log.sets[old]; }
+      if (needsHomeGymClean && logWeek < curWeek) {
+        for (const ex of homeGymPurge) { delete log.sets[ex]; }
+      }
     }
     if (log.difficulty && typeof log.difficulty === "object") {
       for (const [oldName, newName] of Object.entries(renames)) {
         if (log.difficulty[oldName] !== undefined) { log.difficulty[newName] = log.difficulty[oldName]; delete log.difficulty[oldName]; }
       }
       for (const old of purge) { delete log.difficulty[old]; }
+      if (needsHomeGymClean && logWeek < curWeek) {
+        for (const ex of homeGymPurge) { delete log.difficulty[ex]; }
+      }
     }
   }
+  if (needsHomeGymClean) st._homeGymMigrated = true;
   return st;
 }
 
@@ -1107,7 +1124,8 @@ async function syncFromCloud() {
 
       if (cloudCount >= localCount) {
         state = migrateExerciseRenames(migrateBodyWeight(migrateDifficulty(cloudState)));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateForStorage()));
+        await pushToCloud();
         renderAll();
       } else {
         await pushToCloud();
@@ -1729,7 +1747,14 @@ function isDayComplete(logKey, dayKey) {
   if (!log || typeof log.difficulty !== "object" || log.difficulty === null) return false;
   const day = PROGRAM[dayKey];
   if (!day) return false;
-  return day.exercises.every(ex => log.difficulty[ex.name] > 0);
+  const ratings = Object.values(log.difficulty).filter(v => v > 0);
+  // Complete if: ratings exist for current exercises, OR the log has
+  // saved ratings from a previous program version (exercise swap)
+  const currentMatch = day.exercises.every(ex => log.difficulty[ex.name] > 0);
+  if (currentMatch) return true;
+  // Backward compat: if the log has enough saved ratings to indicate
+  // the user completed the workout under a prior exercise lineup
+  return ratings.length >= Math.ceil(day.exercises.length * 0.4);
 }
 
 function getDayAvgDifficulty(logKey, dayKey) {
@@ -1869,7 +1894,9 @@ function renderProgress() {
   document.getElementById("totalWorkouts").textContent = completed;
 
   // Streak: consecutive weeks with all active days complete.
-  // Current week counts if at least one workout is done (still in progress).
+  // Current week: counts if at least one workout done (in progress).
+  // If current week has zero workouts, skip it — don't penalize for
+  // not having started the new week yet.
   let streak = 0;
   for (let w = state.currentWeek; w >= 1; w--) {
     const weekDays = getActiveDays(w);
@@ -1879,7 +1906,7 @@ function renderProgress() {
     } else if (w === state.currentWeek) {
       const anyDone = weekDays.some(d => isDayComplete(`W${w}-${d}`, d));
       if (anyDone) streak++;
-      else break;
+      // If zero workouts in current week, skip — don't break streak
     } else {
       break;
     }
