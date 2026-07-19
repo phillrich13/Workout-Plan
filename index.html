@@ -539,7 +539,7 @@
 <div class="container">
   <div class="header">
     <h1>Strength Training Plan</h1>
-    <p>3 days/week &middot; ~45 min sessions &middot; Planet Fitness &middot; Adaptive progression</p>
+    <p>3 days/week &middot; ~45 min sessions &middot; Home Gym &middot; Adaptive progression</p>
   </div>
 
   <div class="profile-card">
@@ -1024,29 +1024,30 @@ function migrateBodyWeight(st) {
 }
 
 function migrateExerciseRenames(st) {
+  // Only rename exercises where the movement is essentially the same
   const renames = {
-    "Dumbbell Walking Lunges": "Stationary Reverse Lunges",
-    "Leg Press Machine": "Dumbbell Bulgarian Split Squats",
-    "Cable Woodchops": "Band Woodchops",
-    "Seated Cable Row": "Band Seated Row",
-    "Lat Pulldown Machine": "Band Lat Pulldown",
-    "Cable Face Pulls": "Band Face Pulls",
-    "Tricep Pushdowns (Cable)": "Dumbbell Skull Crushers",
-    "Band Tricep Pushdowns": "Dumbbell Skull Crushers",
-    "Leg Curl Machine": "Dumbbell Lying Leg Curls",
-    "Cable Chest Flyes": "Band Chest Flyes"
+    "Dumbbell Walking Lunges": "Stationary Reverse Lunges"
   };
+  // Exercises that were replaced with a fundamentally different movement —
+  // old weight/difficulty data is not applicable, so purge it
+  const purge = [
+    "Leg Press Machine", "Cable Woodchops", "Seated Cable Row",
+    "Lat Pulldown Machine", "Cable Face Pulls", "Tricep Pushdowns (Cable)",
+    "Band Tricep Pushdowns", "Leg Curl Machine", "Cable Chest Flyes"
+  ];
   if (!st || !st.logs) return st;
   for (const log of Object.values(st.logs)) {
     if (log.sets) {
       for (const [oldName, newName] of Object.entries(renames)) {
         if (log.sets[oldName]) { log.sets[newName] = log.sets[oldName]; delete log.sets[oldName]; }
       }
+      for (const old of purge) { delete log.sets[old]; }
     }
     if (log.difficulty && typeof log.difficulty === "object") {
       for (const [oldName, newName] of Object.entries(renames)) {
         if (log.difficulty[oldName] !== undefined) { log.difficulty[newName] = log.difficulty[oldName]; delete log.difficulty[oldName]; }
       }
+      for (const old of purge) { delete log.difficulty[old]; }
     }
   }
   return st;
@@ -1867,13 +1868,21 @@ function renderProgress() {
 
   document.getElementById("totalWorkouts").textContent = completed;
 
-  // Streak: count consecutive weeks where all active days are complete
+  // Streak: consecutive weeks with all active days complete.
+  // Current week counts if at least one workout is done (still in progress).
   let streak = 0;
   for (let w = state.currentWeek; w >= 1; w--) {
     const weekDays = getActiveDays(w);
     const weekDone = weekDays.every(d => isDayComplete(`W${w}-${d}`, d));
-    if (weekDone) streak++;
-    else break;
+    if (weekDone) {
+      streak++;
+    } else if (w === state.currentWeek) {
+      const anyDone = weekDays.some(d => isDayComplete(`W${w}-${d}`, d));
+      if (anyDone) streak++;
+      else break;
+    } else {
+      break;
+    }
   }
   document.getElementById("currentStreak").textContent = streak;
 
