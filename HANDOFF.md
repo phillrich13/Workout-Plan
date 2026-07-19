@@ -331,10 +331,17 @@ Exercises have been replaced over time as the user's needs evolved. When swappin
 | Seated Cable Row | Band Seated Row | Transition to home gym — cables replaced with resistance bands |
 | Lat Pulldown Machine | Band Lat Pulldown | Transition to home gym — machine replaced with bands + door anchor |
 | Cable Face Pulls | Band Face Pulls | Transition to home gym — cables replaced with resistance bands |
-| Tricep Pushdowns (Cable) | Band Tricep Pushdowns | Transition to home gym — cables replaced with resistance bands |
+| Tricep Pushdowns (Cable) → Band Tricep Pushdowns | Dumbbell Skull Crushers | Band pushdowns impractical in user's space — skull crushers use dumbbells + bench |
 | Leg Curl Machine | Dumbbell Lying Leg Curls | Transition to home gym — machine replaced with dumbbell + bench |
 | Cable Chest Flyes | Band Chest Flyes | Transition to home gym — cables replaced with resistance bands |
 | Cable Woodchops | Band Woodchops | Transition to home gym — cables replaced with resistance bands |
+
+### Bodylastics Band System
+Band exercises use `inputType: "band"` and are tracked by the band's max lb rating. The `BODYLASTICS_BANDS` constant defines all available single-band and stacked-band combinations (10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 170 lbs).
+
+The adaptive difficulty system (`getExerciseAdjustment`) uses `getBandAtOrAbove()`, `getBandAtOrBelow()`, and `getBandNearest()` helpers to snap weight suggestions to available band combos instead of arbitrary lb increments. Messages display band labels (e.g., "Try 50 lb band" or "Jump to 20+50 lb bands") instead of generic "+5 lbs" hints.
+
+**Working resistance** at typical exercise stretch is ~50-70% of the band's max rating. The Exercise Guide tab includes a Bodylastics Band Reference table showing max vs. working resistance and recommended exercises for each band.
 
 ---
 
