@@ -533,6 +533,7 @@
   }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
@@ -964,7 +965,12 @@ let db = null;
 let dbRef = null;
 try {
   if (typeof firebase !== "undefined") {
-    firebase.initializeApp({ databaseURL: "https://workout-plan-bba64-default-rtdb.firebaseio.com" });
+    firebase.initializeApp({
+      apiKey: "AIzaSyDaAvZsnKhYZn1_AKIzGZXBd6KWVteqG7Y",
+      authDomain: "workout-plan-bba64.firebaseapp.com",
+      databaseURL: "https://workout-plan-bba64-default-rtdb.firebaseio.com",
+      projectId: "workout-plan-bba64"
+    });
     db = firebase.database();
     dbRef = db.ref("workoutState");
   }
@@ -1107,6 +1113,10 @@ async function syncFromCloud() {
     updateSyncUI("offline", "Offline mode — data saved in browser");
     return;
   }
+  if (typeof firebase !== "undefined" && firebase.auth && !firebase.auth().currentUser) {
+    updateSyncUI("offline", "Waiting for auth...");
+    return;
+  }
   updateSyncUI("syncing", "Syncing with Firebase...");
 
   try {
@@ -1193,9 +1203,18 @@ if (dbRef) {
   });
 }
 
-// Initial sync on page load
+// Initial sync on page load — wait for auth first
 window.addEventListener("DOMContentLoaded", () => {
-  syncFromCloud();
+  if (typeof firebase !== "undefined" && firebase.auth) {
+    firebase.auth().signInAnonymously()
+      .then(() => syncFromCloud())
+      .catch(e => {
+        console.warn("Anonymous auth failed, running offline:", e);
+        updateSyncUI("offline", "Auth failed — data saved in browser");
+      });
+  } else {
+    syncFromCloud();
+  }
 });
 
 // ========== PHASE & ADJUSTMENT LOGIC ==========
