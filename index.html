@@ -973,6 +973,8 @@ try {
     });
     db = firebase.database();
     dbRef = db.ref("workoutState");
+    firebase.auth().signInAnonymously()
+      .catch(e => console.warn("Anonymous auth failed, running offline:", e));
   }
 } catch(e) {
   console.warn("Firebase unavailable, running in offline mode:", e);
