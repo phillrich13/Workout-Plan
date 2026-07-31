@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A self-contained, single-file HTML strength training dashboard for a user returning to lifting after 15 years. The app is a 16-week progressive program with adaptive difficulty, cross-device sync via Firebase, and full offline capability. It's hosted on GitHub Pages and designed to be used primarily on mobile at the gym.
+A self-contained, single-file HTML strength training dashboard for a user returning to lifting after 15 years. The app runs a 16-week full-body program (based on Jeremy Ethier's routine) with adaptive difficulty, cross-device sync via Firebase, and full offline capability. Hosted on GitHub Pages and designed for mobile use at home.
 
 **Live URL:** https://phillrich13.github.io/Workout-Plan/
 **Repo:** https://github.com/phillrich13/Workout-Plan
@@ -14,7 +14,7 @@ A self-contained, single-file HTML strength training dashboard for a user return
 
 - **Height:** 5'10", **Starting Weight:** 268.5 lbs
 - **Current activity:** Walking 3-4 mi 5x/week, hiking 4-8 mi on Saturdays
-- **Gym access:** Home gym (Bowflex SelectTech 552 dumbbells 5-52.5 lb, FLYBIRD adjustable bench, Bodylastics resistance bands with door anchor, step platform, pull-up bar, floor mat)
+- **Gym access:** Home gym (Bowflex SelectTech 552 dumbbells 5-52.5 lb, FLYBIRD adjustable bench, Bodylastics PRO 6-Band Set with door anchor, pull-up bar, floor mat)
 - **Goals:**
   - **Lower body:** Strength for hiking harder trails
   - **Upper body:** Aesthetic physique
@@ -38,7 +38,7 @@ User input → state object → localStorage (immediate) → Firebase Realtime D
 - **Project:** `workout-plan-bba64`
 - **Database URL:** `https://workout-plan-bba64-default-rtdb.firebaseio.com`
 - **Database path:** `/workoutState`
-- **Auth:** None (public read/write rules — this is a personal project)
+- **Auth:** Anonymous authentication (`firebase.auth().signInAnonymously()`) with rules requiring `auth != null`
 - **SDK:** Firebase compat v9.23.0 via CDN
 
 ### Offline Resilience
@@ -48,26 +48,32 @@ Firebase initialization is wrapped in a try/catch. If the SDK scripts fail to lo
 
 ## Program Structure
 
-### Three Training Days
-| Key | Day | Focus | Badge |
-|-----|-----|-------|-------|
-| `A` | Monday | Lower Body + Core | `lower` (sage) |
-| `B` | Wednesday | Upper Body Push + Pull | `upper` (purple) |
-| `C` | Friday | Lower Power + Upper Accessories | `full` (rose) |
+### Full Body — Same Workout 3x/Week
+Based on Jeremy Ethier's "The ONLY Workout You Need For 2026" routine. All 3 days (Mon/Wed/Fri) share the same `FULL_BODY_EXERCISES` array:
 
-### Phase-Based Day Scheduling
-The Foundation phase uses only 2 workout days per week (Monday and Wednesday). Friday is displayed as a disabled "Rest" tab. All subsequent phases use all 3 days. This is controlled by:
-- `PHASES[0].days` — Array `["A","B"]` for Foundation; omitted for other phases (defaults to `["A","B","C"]`)
-- `getActiveDays(week)` — Returns the active day array for a given week
-- `renderWorkouts()`, `renderProgress()`, `getNextWorkoutDay()`, and `isDayComplete()` all use `getActiveDays()` to correctly handle workout counts, streaks, phase bars, and default-tab selection
+| # | Exercise | Sets × Reps | Equipment | Input Type |
+|---|----------|-------------|-----------|------------|
+| 1 | Low Incline Dumbbell Press | 3×10-15 | Dumbbells + bench (2 notches) | weighted |
+| 2 | Goblet Squat | 3×10-15 | Dumbbell | weighted |
+| 3 | Inverted Rows | 3×8-15 | Bar at waist height (or pull-up bar lowered) | bodyweight |
+| 4 | Dumbbell Romanian Deadlift | 3×10-15 | Dumbbells | weighted |
+| 5 | Band Seated Row | 3×10-15 | Resistance band | band |
+| 6 | Lateral Raise Superset | 3×10-20 | Dumbbells + bench | weighted |
+| 7 | Dead Bug | 3×5/side | Bodyweight | bodyweight |
+| 8 | Incline Dumbbell Curls | 3×8-12 | Dumbbells + bench | weighted |
+| 9 | Dumbbell Overhead Extension | 3×8-12 | Dumbbell | weighted |
+
+`PROGRAM.A`, `PROGRAM.B`, and `PROGRAM.C` all reference the same `FULL_BODY_EXERCISES` array. Day names are "Monday — Full Body", "Wednesday — Full Body", "Friday — Full Body". Badge is `"full"` for all three.
 
 ### Four Phases (4 weeks each)
-| Phase | Weeks | Days/Week | Sets | Reps | Rest |
-|-------|-------|-----------|------|------|------|
-| Foundation | 1-4 | 2 (Mon/Wed) | 2-3 | 12-15 | 45-60s |
-| Building | 5-8 | 3 | 3 | 10-12 | 60-75s |
-| Strength | 9-12 | 3 | 3-4 | 8-10 | 75-90s |
-| Performance | 13-16 | 3 | 3-4 | 6-8 | 90s |
+Progression is simple — same sets/reps throughout, progress by increasing weight when exercises feel easy.
+
+| Phase | Weeks | Days/Week | Description |
+|-------|-------|-----------|-------------|
+| Foundation | 1-4 | 3 | Learn movement patterns. Light weights, higher reps, focus on form. |
+| Building | 5-8 | 3 | Increase loads gradually. Movements should feel more natural. |
+| Strength | 9-12 | 3 | Heavier loads, aim for the lower end of rep ranges. |
+| Performance | 13-16 | 3 | Peak intensity. Challenge yourself on every set. |
 
 ### Adaptive Difficulty System (Per-Exercise)
 After each exercise, the user rates difficulty 1-5 via inline buttons. Ratings are stored per-exercise in the `difficulty` object (keyed by exercise name). The Exercise Guide tab includes descriptive context for each rating level (what it should feel like physically) along with the adjustment recommendation.
@@ -111,17 +117,17 @@ Each exercise has an optional `inputType` field:
   logs: {
     "W1-A": {              // Key format: W{week}-{day}
       difficulty: {         // Per-exercise ratings (object keyed by exercise name)
-        "Goblet Squat (Dumbbell)": 3,
-        "Dumbbell Romanian Deadlift": 2,
+        "Low Incline Dumbbell Press": 3,
+        "Goblet Squat": 2,
         // ...one entry per exercise
       },
-      date: "2026-06-26",
-      bodyWeight: 268,      // Optional weigh-in for that session
+      date: "2026-07-31",
+      bodyWeight: 265,      // Optional weigh-in for that session
       sets: {
-        "Goblet Squat (Dumbbell)": [
-          { weight: 25, reps: 12 },  // Per-set tracking
-          { weight: 25, reps: 12 },
-          { weight: 25, reps: 10 }
+        "Low Incline Dumbbell Press": [
+          { weight: 20, reps: 12 },  // Per-set tracking
+          { weight: 20, reps: 12 },
+          { weight: 20, reps: 10 }
         ]
       }
     }
@@ -138,7 +144,10 @@ Each exercise has an optional `inputType` field:
 **Migration functions** (run on every `loadState` and cloud sync):
 - `migrateDifficulty()` — Converts old numeric `difficulty` (single rating per day) to per-exercise object format
 - `migrateBodyWeight()` — Merges `SEED_WEIGHTS` (36 historical weigh-ins) into `state.bodyWeight`, deduplicating by date
-- `migrateExerciseRenames()` — Renames exercise keys in `sets` and `difficulty` objects across all logs when exercises are swapped out. Current rename map: `"Dumbbell Walking Lunges"` → `"Stationary Reverse Lunges"`
+- `migrateExerciseRenames()` — Renames exercise keys in `sets` and `difficulty` objects across all logs when exercises are swapped out. Also runs one-time purge operations for exercises removed in major program changes. Current migrations:
+  - **Renames:** `"Dumbbell Walking Lunges"` → `"Stationary Reverse Lunges"`, `"Goblet Squat (Dumbbell)"` → `"Goblet Squat"`
+  - **Home gym purge** (`_homeGymMigrated`): Removes stale data from gym-to-home transitions (past weeks only)
+  - **Full body purge** (`_fullBodyMigrated`): Removes all old 3-day-split exercises from past weeks when switching to the new full-body program
 
 ---
 
@@ -151,7 +160,7 @@ Each exercise has an optional `inputType` field:
 
 ### Workout Tab Details
 - **Week navigation** with prev/next buttons (weeks 1-16)
-- **Day sub-tabs** (Mon | Wed | Fri) with checkmarks for completed days; Foundation phase shows Friday as a disabled "Rest" tab
+- **Day sub-tabs** (Mon | Wed | Fri) with checkmarks for completed days
 - **Default tab:** On load, `getNextWorkoutDay()` finds the earliest incomplete workout across all active weeks/days and defaults to that day/week
 - **Weigh-in input** on every workout day with a dedicated Save button (does not auto-save on change)
 - **Prescription column** — Displays the base phase prescription adjusted by `getExerciseAdjustment()` when prior data exists (e.g., "3 x 10-13" instead of static "3 x 12-15")
@@ -214,19 +223,19 @@ Each exercise object in the `PROGRAM` constant:
 
 ```javascript
 {
-  name: "Dumbbell Bench Press (Flat)",
-  video: "YwrzZaNqJWU",                       // YouTube video ID (optional)
-  muscle: "Chest, Front Delts, Triceps",
-  purpose: "How this builds your physique",   // or "Why this matters for hiking"
-  startWeight: "Bar only or +10-20 lbs",      // Shown weeks 1-2 only
-  inputType: "weighted",                       // "weighted" (default), "timed", or "bodyweight"
+  name: "Low Incline Dumbbell Press",
+  videoStart: 41,                              // Seconds offset into VIDEO_ID video
+  muscle: "Chest, Shoulders, Triceps",
+  purpose: "How this builds your physique",   // or "Why this builds strength"
+  startWeight: "15-20 lb dumbbells",           // Shown when no adaptive data
+  inputType: "weighted",                       // "weighted" (default), or "bodyweight"
   phases: {
-    1: { sets: 3, reps: "12-15", rest: "60s" },
-    2: { sets: 3, reps: "10-12", rest: "75s" },
-    3: { sets: 4, reps: "8-10",  rest: "90s" },
-    4: { sets: 4, reps: "6-8",   rest: "90s" }
+    1: { sets: 3, reps: "10-15", rest: "60s" },
+    2: { sets: 3, reps: "10-15", rest: "60s" },
+    3: { sets: 3, reps: "10-15", rest: "60s" },
+    4: { sets: 3, reps: "10-15", rest: "60s" }
   },
-  note: "Outcome-focused description (hiking benefit or physique result)",
+  note: "Outcome-focused description",
   guide: "Full form instructions for the Exercise Guide tab"
 }
 ```
@@ -239,22 +248,24 @@ Each exercise object in the `PROGRAM` constant:
 
 ## Exercise Form Videos
 
-Each exercise in the `PROGRAM` constant has an optional `video` property containing a YouTube video ID (the `v=` parameter value). All 22 exercises currently have videos sourced from trusted fitness channels (ScottHermanFitness, PureGym, ATHLEAN-X, Buff Dudes, Bodybuilding.com, etc.).
+All exercises use timestamped links into a single YouTube video: Jeremy Ethier's "The ONLY Workout You Need For 2026" (`VIDEO_ID = "n_YW24F5HGc"`). Each exercise has a `videoStart` property (seconds) instead of individual video IDs.
 
 ### How It Works
-- In the Exercise Guide tab, `renderGuide()` conditionally renders a "Watch Form Video" button below each exercise's highlight box when a `video` ID is present.
-- Clicking the button calls `toggleVideo(id)`, which shows/hides a responsive 16:9 iframe container and swaps the button text to "Hide Video".
-- Iframes use `loading="lazy"` so they don't load until the user expands them — no performance impact on page load.
-- The embed URL includes `?rel=0` to suppress YouTube's related video suggestions.
-- Video container IDs are derived from the exercise name with non-alphanumeric characters stripped (e.g., `vid-GobletSquatDumbbell`).
+- In the Exercise Guide tab, `renderGuide()` renders a "Watch Form Video" button when `ex.videoStart != null`.
+- Clicking the button calls `toggleVideo(id)`, which shows/hides a responsive 16:9 iframe and swaps button text to "Hide Video".
+- The embed URL is `https://www.youtube.com/embed/${VIDEO_ID}?rel=0&start=${ex.videoStart}`.
+- Iframes use `loading="lazy"` and `data-src` pattern — the iframe `src` is only set when the user clicks to watch.
 
-### Styling
-- `.video-toggle` — Small secondary button matching the floral theme (blue accent, hover fills solid)
-- `.video-container` — Responsive 16:9 wrapper using the `padding-bottom: 56.25%` aspect ratio technique
-- `.video-container iframe` — Absolute positioned to fill the container, no border
-
-### Adding/Changing Videos
-To swap a video, change the `video` property on the exercise object to a different YouTube video ID. To remove a video, delete the `video` property — the button won't render.
+### Timestamps
+| Exercise | Timestamp | Seconds |
+|----------|-----------|---------|
+| Low Incline DB Press | 0:41 | 41 |
+| Goblet Squat | 2:19 | 139 |
+| Pull-Ups | 4:23 | 263 |
+| RDL | 5:49 | 349 |
+| Band Seated Row | 7:37 | 457 |
+| Lateral Raise Superset | 8:55 | 535 |
+| Dead Bug / Arms | 10:22 | 622 |
 
 ---
 
@@ -311,30 +322,20 @@ When the user logs a weigh-in via the Save button on any workout day:
 
 ## Known Constraints
 
-1. **Planet Fitness equipment only** — No barbells, no squat racks, no power racks, no Smith machines. Program uses cables, dumbbells (up to 75 lb), and plate-loaded machines only.
-2. **Firebase auth is open** — The database has public read/write rules. Acceptable for a single-user personal project but would need auth if shared.
+1. **Home gym equipment only** — Bowflex SelectTech 552 dumbbells (5-52.5 lb), adjustable bench, pull-up bar, resistance bands with door anchor. No barbells or machines.
+2. **Firebase auth** — Uses anonymous authentication with `auth != null` rules. Single-user personal project.
 3. **Single-file architecture** — All ~2,000+ lines live in one HTML file. If the app grows significantly, consider splitting into separate CSS/JS files.
 4. **Corporate proxy** — GitHub Pages works fine, but any backend that requires cross-origin requests to Google domains may be blocked by Zscaler on the user's work network.
 5. **Weight data source** — Historical weigh-ins were extracted from `/Users/prichardson2/Documents/apple_health_export/export.xml` (Apple Health → Withings scale records). Future imports would need the same XML parsing approach.
 
-### Exercise Swap History
-Exercises have been replaced over time as the user's needs evolved. When swapping exercises, add entries to the `renames` map in `migrateExerciseRenames()` so historical log data carries over automatically.
+### Program Evolution
+The workout plan has gone through three major iterations:
 
-| Original Exercise | Replacement | Reason |
-|---|---|---|
-| Smith Machine Squat | Dumbbell Sumo Squat | No Smith machine access |
-| Smith Machine Romanian Deadlift | Dumbbell Romanian Deadlift | No Smith machine access |
-| Smith Machine Bench Press | Dumbbell Bench Press (Flat) | No Smith machine access |
-| Smith Machine Calf Raises | Dumbbell Standing Calf Raises | No Smith machine access |
-| Dumbbell Walking Lunges | Stationary Reverse Lunges | User found walking lunges too difficult at current body weight — reverse lunges train the same muscles with more stability and less knee stress |
-| Leg Press Machine | Dumbbell Bulgarian Split Squats | Transition to home gym — no leg press machine available |
-| Seated Cable Row | Band Seated Row | Transition to home gym — cables replaced with resistance bands |
-| Lat Pulldown Machine | Band Lat Pulldown | Transition to home gym — machine replaced with bands + door anchor |
-| Cable Face Pulls | Band Face Pulls | Transition to home gym — cables replaced with resistance bands |
-| Tricep Pushdowns (Cable) → Band Tricep Pushdowns | Dumbbell Skull Crushers | Band pushdowns impractical in user's space — skull crushers use dumbbells + bench |
-| Leg Curl Machine | Dumbbell Lying Leg Curls | Transition to home gym — machine replaced with dumbbell + bench |
-| Cable Chest Flyes | Band Chest Flyes | Transition to home gym — cables replaced with resistance bands |
-| Cable Woodchops | Band Woodchops | Transition to home gym — cables replaced with resistance bands |
+1. **Original (Planet Fitness)** — 3-day split (Lower/Upper/Hybrid) using gym machines and cables
+2. **Home Gym Transition** — Same 3-day split but swapped all machine/cable exercises for dumbbell + band equivalents
+3. **Full Body (Current)** — Complete rewrite to Jeremy Ethier's full-body routine. All 3 days share the same 9 exercises. Old exercises purged via `_fullBodyMigrated` flag in `migrateExerciseRenames()`.
+
+When changing exercises, add entries to `renames` (for same-movement swaps where data should carry over) or to `fullBodyPurge` (for completely different exercises where old data is irrelevant).
 
 ### Bodylastics Band System
 Band exercises use `inputType: "band"` and are tracked by the band's max lb rating. The `BODYLASTICS_BANDS` constant defines all available single-band and stacked-band combinations (10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 170 lbs).
