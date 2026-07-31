@@ -540,7 +540,7 @@
 <div class="container">
   <div class="header">
     <h1>Strength Training Plan</h1>
-    <p>3 days/week &middot; ~45 min sessions &middot; Home Gym &middot; Adaptive progression</p>
+    <p>3 days/week &middot; Full Body &middot; Home Gym &middot; Adaptive progression</p>
   </div>
 
   <div class="profile-card">
@@ -664,262 +664,115 @@
 <script>
 // ========== PROGRAM DEFINITION ==========
 const PHASES = [
-  { name: "Foundation", weeks: [1,2,3,4], days: ["A","B"], description: "2 days/week — build movement patterns, joint conditioning, and baseline strength. Light weights, higher reps, focus on form and recovery." },
-  { name: "Building", weeks: [5,6,7,8], description: "Increase load gradually. Moderate weight, moderate reps. Movements become more compound." },
-  { name: "Strength", weeks: [9,10,11,12], description: "Heavier loads, lower rep ranges. Focus on progressive overload and strength gains." },
-  { name: "Performance", weeks: [13,14,15,16], description: "Peak intensity with hiking-specific power work. Prepare for harder trails." }
+  { name: "Foundation", weeks: [1,2,3,4], description: "Learn each movement pattern. Light weights, higher reps, focus on form. Progress by adding weight when exercises feel easy." },
+  { name: "Building", weeks: [5,6,7,8], description: "Increase loads gradually. Same exercises — push intensity via weight. Movements should feel more natural." },
+  { name: "Strength", weeks: [9,10,11,12], description: "Heavier loads, aim for the lower end of rep ranges. Focus on progressive overload." },
+  { name: "Performance", weeks: [13,14,15,16], description: "Peak intensity. Challenge yourself on every set. Consider reducing band assistance on pull-ups." }
 ];
 
-// Home gym: Bowflex SelectTech 552 dumbbells, adjustable bench, resistance bands w/ door anchor, pull-up bar, step platform
-const PROGRAM = {
-  // DAY A: Lower Body + Core (hiking priority)
-  A: {
-    name: "Monday — Lower Body + Core",
-    badge: "lower",
-    exercises: [
-      {
-        name: "Goblet Squat (Dumbbell)",
-        video: "Xjo_fY9Hl9w",
-        muscle: "Quads, Glutes",
-        purpose: "Why this matters for hiking",
-        startWeight: "20-30 lb dumbbell",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
-        note: "Builds the raw pushing power you need for steep uphill climbs and high-step scrambles on rocky trails.",
-        guide: "Stand shoulder-width apart, hold a dumbbell vertically against your chest with both hands. Push hips back, bend knees, lower until thighs are at least parallel. Drive through heels to stand. Keep your torso upright throughout."
-      },
-      {
-        name: "Dumbbell Romanian Deadlift",
-        video: "GSPs7-c_sf0",
-        muscle: "Hamstrings, Glutes, Lower Back",
-        purpose: "Why this matters for hiking",
-        startWeight: "20-30 lb dumbbells",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
-        note: "Develops the hamstring and glute strength that controls your descent on steep downhills and protects your knees under load.",
-        guide: "Stand with feet hip-width apart, holding a dumbbell in each hand in front of your thighs with palms facing you. With a slight bend in your knees (keep them fixed), hinge at the hips pushing your butt back. Lower the dumbbells along your thighs until you feel a deep hamstring stretch (mid-shin area). Squeeze glutes to return to standing. The dumbbells will naturally hang closer to your body than a bar — let them track along your legs."
-      },
-      {
-        name: "Dumbbell Bulgarian Split Squats",
-        video: "4tKKxQy_D98",
-        muscle: "Quads, Glutes, Balance",
-        purpose: "Why this matters for hiking",
-        startWeight: "Bodyweight (add 10-15 lb dumbbells when ready)",
-        phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"75s"},3:{sets:3,reps:"12 each leg",rest:"90s"},4:{sets:3,reps:"12 each leg",rest:"90s"}},
-        note: "Heavy single-leg strength that translates directly to sustained power on long inclines — trains each leg independently to fix imbalances.",
-        guide: "Stand 2-3 feet in front of your bench, back to it. Place the top of your rear foot on the bench. Hold a dumbbell in each hand at your sides. Lower your hips until your front thigh is near parallel, back knee hovering above the floor. Push through your front heel to stand. Keep torso upright, chest up. Complete all reps on one leg before switching."
-      },
-      {
-        name: "Stationary Reverse Lunges",
-        video: "ljZA17b52FE",
-        muscle: "Quads, Glutes, Balance",
-        purpose: "Why this matters for hiking",
-        startWeight: "Bodyweight (add 10-15 lb dumbbells when ready)",
-        phases: {1:{sets:2,reps:"8 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
-        note: "Builds the same single-leg power and balance as walking lunges with more stability and less knee stress — directly trains the stepping motion for trail hiking.",
-        guide: "Stand upright with feet hip-width apart, hands at your sides (add dumbbells when bodyweight feels easy). Step one leg backward about two feet, landing on the ball of your foot. Bend both knees to lower until each forms a ~90 degree angle — back knee hovers just above the floor. Keep your torso upright and front shin vertical. Push through the heel of your front foot to return to standing. Alternate legs. Hold a machine or wall for balance if needed."
-      },
-      {
-        name: "Dumbbell Standing Calf Raises",
-        video: "wxwY7GXxL4k",
-        muscle: "Calves",
-        purpose: "Why this matters for hiking",
-        startWeight: "25-40 lb dumbbells",
-        phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"15-20",rest:"45s"},3:{sets:4,reps:"12-15",rest:"45s"},4:{sets:4,reps:"12-15",rest:"45s"}},
-        note: "Strong calves prevent fatigue and cramping on steep inclines and give you sure footing on rocky, uneven surfaces.",
-        guide: "Hold a dumbbell in each hand at your sides. Stand on a step or weight plate with just the balls of your feet, heels hanging off the edge. Lower your heels below the step for a full stretch, then rise up onto your toes as high as possible. Pause at the top for 1 second. If balance is an issue, hold one dumbbell and use your free hand on a wall or machine for support."
-      },
-      {
-        name: "Band Woodchops",
-        video: "Yp2DmHk3KnY",
-        muscle: "Core, Obliques",
-        purpose: "Why this matters for hiking",
-        inputType: "band",
-        startWeight: "20 lb band",
-        phases: {1:{sets:2,reps:"12 each side",rest:"45s"},2:{sets:3,reps:"12 each side",rest:"45s"},3:{sets:3,reps:"10 each side",rest:"60s"},4:{sets:3,reps:"10 each side",rest:"60s"}},
-        note: "Rotational core power keeps you stable when navigating roots, rocks, and off-camber trail sections with a loaded pack.",
-        guide: "Anchor the band high on a door anchor. Stand sideways to the door, grab both ends of the band with both hands. Pull the band diagonally across your body from high to low, rotating your torso. Control the return. Keep arms relatively straight — the rotation comes from your core, not your arms. Step further from the door for more resistance."
-      },
-      {
-        name: "Plank Hold",
-        video: "htqqk_uojIs",
-        muscle: "Core",
-        purpose: "Why this matters for hiking",
-        startWeight: "Bodyweight",
-        inputType: "timed",
-        phases: {1:{sets:2,reps:"20-30 sec",rest:"45s"},2:{sets:3,reps:"30-45 sec",rest:"45s"},3:{sets:3,reps:"45-60 sec",rest:"45s"},4:{sets:3,reps:"60 sec",rest:"45s"}},
-        note: "Builds the deep core endurance that keeps your posture solid over miles and prevents low-back fatigue on long hikes.",
-        guide: "Get on your forearms and toes, body in a straight line from head to heels. Squeeze your glutes, brace your abs as if someone is about to punch your stomach, and hold. Don't let your hips sag or pike up. Breathe steadily."
-      }
-    ]
+// Home gym: Bowflex SelectTech 552 dumbbells, adjustable bench, resistance bands w/ door anchor, pull-up bar
+// Program: Jeremy Ethier — The ONLY Workout You Need For 2026 (youtube.com/watch?v=n_YW24F5HGc)
+const VIDEO_ID = "n_YW24F5HGc";
+const FULL_BODY_EXERCISES = [
+  {
+    name: "Low Incline Dumbbell Press",
+    videoStart: 41,
+    muscle: "Chest, Shoulders, Triceps",
+    purpose: "How this builds your physique",
+    startWeight: "15-20 lb dumbbells",
+    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    note: "Builds your entire chest like a flat press, plus the bonus of developing your upper chest, shoulders, and triceps in one movement.",
+    guide: "Set your bench 2 notches up from flat (your sternum angles back). Grab dumbbells, kick them up to starting position. Tuck elbows slightly — press in an arrow shape, not a T — for a deeper chest stretch and less shoulder stress. Lower until you feel a stretch across your chest, then press up. Keep feet flat, slight arch in lower back."
   },
-  // DAY B: Upper Body Push + Pull (aesthetics focus)
-  B: {
-    name: "Wednesday — Upper Body Push + Pull",
-    badge: "upper",
-    exercises: [
-      {
-        name: "Dumbbell Bench Press (Flat)",
-        video: "YwrzZaNqJWU",
-        muscle: "Chest, Front Delts, Triceps",
-        purpose: "How this builds your physique",
-        startWeight: "20-30 lb dumbbells",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
-        note: "The foundation of a fuller, more defined chest. Dumbbells allow a deeper stretch at the bottom than a bar, activating more muscle fibers for a thicker, more complete chest.",
-        guide: "Lie flat on a bench with a dumbbell in each hand at chest level, palms facing forward. Press the dumbbells up until arms are fully extended, bringing them slightly together at the top without clanking. Lower slowly (2-3 seconds) until your elbows are just below bench level — this deeper range of motion is the advantage over a barbell. Keep your feet flat on the floor and maintain a slight natural arch in your lower back."
-      },
-      {
-        name: "Band Seated Row",
-        video: "LSkyinhmA8k",
-        muscle: "Mid Back, Lats, Biceps",
-        purpose: "How this builds your physique",
-        inputType: "band",
-        startWeight: "50 lb band",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
-        note: "Widens your back and improves posture, creating the V-taper silhouette that makes your waist look narrower.",
-        guide: "Sit on the floor with legs extended, slight bend in knees. Loop the band around the soles of your feet (wrap an extra time for security). Sit tall with chest up. Pull the handles to your lower chest, squeezing your shoulder blades together hard at the end. Slowly extend arms back. Don't round your back. Step further from the anchor or double up bands for more resistance."
-      },
-      {
-        name: "Dumbbell Overhead Press (Seated)",
-        video: "E9ShwbwZ1zw",
-        muscle: "Shoulders, Triceps",
-        purpose: "How this builds your physique",
-        startWeight: "15-20 lb dumbbells",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
-        note: "Creates the rounded, capped shoulder look that broadens your frame and adds dimension to your upper body.",
-        guide: "Sit on a bench with back support set to ~85 degrees (almost vertical). Hold dumbbells at shoulder height, palms facing forward. Press them up until arms are fully extended overhead. Lower back to shoulder height with control. Don't arch your lower back excessively."
-      },
-      {
-        name: "Band Lat Pulldown",
-        video: "8vGCZsoeP_4",
-        muscle: "Lats, Upper Back, Biceps",
-        purpose: "How this builds your physique",
-        inputType: "band",
-        startWeight: "50 lb band",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"8-10",rest:"90s"}},
-        note: "Builds lat width for a wider V-taper — the single biggest contributor to an athletic-looking upper body.",
-        guide: "Anchor the band to the top of a door using the door anchor, or loop it over your pull-up bar. Kneel facing the anchor, grab one end of the band in each hand with arms extended overhead. Retract and depress your shoulder blades first, then drive your elbows down and outward until hands reach shoulder height. Squeeze your lats at the bottom. Slowly return to start with control."
-      },
-      {
-        name: "Dumbbell Incline Press",
-        video: "ou6s32mJgjU",
-        muscle: "Upper Chest, Shoulders",
-        purpose: "How this builds your physique",
-        startWeight: "15-25 lb dumbbells",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"75s"},4:{sets:3,reps:"8-10",rest:"75s"}},
-        note: "Fills out the upper chest for a balanced, full look from collarbone to sternum — the area most visible in V-necks.",
-        guide: "Set an adjustable bench to 30-45 degrees. Lie back with dumbbells at chest level, palms forward. Press the dumbbells up and slightly toward each other (without clanking). Lower slowly until you feel a stretch across your upper chest."
-      },
-      {
-        name: "Band Face Pulls",
-        video: "Wq-Td9UXRK8",
-        muscle: "Rear Delts, Rotator Cuff",
-        purpose: "How this builds your physique",
-        inputType: "band",
-        startWeight: "20 lb band",
-        phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"12-15",rest:"45s"},4:{sets:3,reps:"12-15",rest:"45s"}},
-        note: "Balances out all the pressing work, prevents rounded shoulders, and builds the rear delt definition that makes shoulders look 3D.",
-        guide: "Anchor the band at face height on a door anchor. Step back until the band is taut. Grab both ends, pull toward your face with elbows high and parallel to the ground. Squeeze your shoulder blades together and hold for 1 second. Return with control. Keep elbows high throughout. Go light — this is about muscle activation, not heavy resistance."
-      },
-      {
-        name: "Dumbbell Bicep Curls",
-        video: "629tfTQ1MEk",
-        muscle: "Biceps",
-        purpose: "How this builds your physique",
-        startWeight: "10-20 lb dumbbells",
-        phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
-        note: "Adds size to the bicep peak — the first muscle people notice when your sleeves are rolled up.",
-        guide: "Stand with dumbbells at your sides, palms facing forward. Curl the weight up by bending at the elbow only — your upper arm should not move. Squeeze at the top, then lower slowly (3 seconds down). Don't swing your body or use momentum."
-      },
-      {
-        name: "Dumbbell Skull Crushers",
-        video: "ir5PsbniVSc",
-        muscle: "Triceps",
-        purpose: "How this builds your physique",
-        startWeight: "10-15 lb dumbbells",
-        phases: {1:{sets:2,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
-        note: "Triceps make up two-thirds of your arm size — skull crushers target the long head for the thickest part of the arm.",
-        guide: "Lie on the bench with a dumbbell in each hand, palms facing each other. Press the dumbbells up so your arms are straight above your chest. Keep your upper arms locked in place — only bend at the elbows to lower the weights slowly toward the sides of your head. Squeeze your triceps to press back up. Don't let your elbows flare out wide."
-      }
-    ]
+  {
+    name: "Goblet Squat",
+    videoStart: 139,
+    muscle: "Quads, Glutes, Core",
+    purpose: "Why this builds strength",
+    startWeight: "25 lb dumbbell",
+    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    note: "Holding the weight at your chest forces you to brace your core and fixes squat form instantly. You can go surprisingly heavy. Goal: work up to half your bodyweight for 10 reps.",
+    guide: "Hold a dumbbell vertically against your chest with both hands. Try three stances to find what feels natural: shoulder-width with slight toe-out, narrow with toes forward, or wider with toes way out. Push hips back, bend knees, lower until thighs are at least parallel. Drive through heels to stand. Keep torso upright throughout."
   },
-  // DAY C: Lower Power + Upper Accessories (hybrid day)
-  C: {
-    name: "Friday — Lower Power + Upper Accessories",
-    badge: "full",
-    exercises: [
-      {
-        name: "Dumbbell Sumo Squat",
-        video: "daK6R6Y6fcU",
-        muscle: "Quads, Glutes, Inner Thighs",
-        purpose: "Why this matters for hiking",
-        startWeight: "30-40 lb dumbbell",
-        phases: {1:{sets:3,reps:"12-15",rest:"60s"},2:{sets:3,reps:"10-12",rest:"75s"},3:{sets:4,reps:"8-10",rest:"90s"},4:{sets:4,reps:"6-8",rest:"90s"}},
-        note: "Builds a wider base of support and lateral stability — the inner thigh and glute strength that keeps you stable on uneven terrain and side-slope traversals.",
-        guide: "Stand with feet wide (1.5x shoulder-width), toes pointed out at 45 degrees. Hold a single dumbbell vertically with both hands, arms hanging straight down between your legs. Push hips back and bend knees, lowering until thighs are parallel to the floor. Drive through your heels to stand. Keep your torso upright and chest proud throughout — don't lean forward."
-      },
-      {
-        name: "Dumbbell Step-Ups (to bench)",
-        video: "aKj-6hgiViA",
-        muscle: "Quads, Glutes, Balance",
-        purpose: "Why this matters for hiking",
-        startWeight: "Bodyweight or 10-15 lb dumbbells",
-        phases: {1:{sets:2,reps:"10 each leg",rest:"60s"},2:{sets:3,reps:"10 each leg",rest:"60s"},3:{sets:3,reps:"12 each leg",rest:"75s"},4:{sets:3,reps:"12 each leg",rest:"75s"}},
-        note: "The single most trail-specific exercise — directly trains the stepping motion and single-leg power for climbing rocky switchbacks.",
-        guide: "Hold dumbbells at your sides. Place one foot fully on a bench. Drive through that heel to step up, bringing the other foot up to the bench. Step back down with the trailing leg first. Complete all reps on one leg before switching. Don't push off the bottom foot — make the top leg do the work."
-      },
-      {
-        name: "Dumbbell Lying Leg Curls",
-        video: "ZHlBSI6JPsA",
-        muscle: "Hamstrings",
-        purpose: "Why this matters for hiking",
-        startWeight: "5-10 lb dumbbell",
-        phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"8-10",rest:"60s"},4:{sets:4,reps:"8-10",rest:"60s"}},
-        note: "Strong hamstrings act as brakes on steep descents, protecting your knees from the pounding of long downhill sections.",
-        guide: "Lie face down on the bench with legs hanging off the end past the knees. Secure a dumbbell between your feet by squeezing them together around the handle. Keep hips pressed into the bench. Curl the dumbbell toward your glutes by bending your knees. Squeeze hamstrings at the top for 1 second. Lower slowly (3 seconds). Start light — securing the dumbbell between your feet takes practice."
-      },
-      {
-        name: "Dumbbell Lateral Raises",
-        video: "WJm9zA2NY8E",
-        muscle: "Side Delts",
-        purpose: "How this builds your physique",
-        startWeight: "10-15 lb dumbbells",
-        phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"45s"},3:{sets:3,reps:"10-12",rest:"45s"},4:{sets:4,reps:"10-12",rest:"45s"}},
-        note: "The top exercise for building wider shoulders — creates the broad-shouldered frame that defines an athletic silhouette.",
-        guide: "Stand with dumbbells at your sides. Lean forward slightly at the hips (~10 degrees). Raise the dumbbells out to your sides until arms are parallel to the floor (like a T). Lead with your elbows, not your hands. Lower slowly. Use lighter weight than you think — 10-15 lbs is plenty for most people starting out."
-      },
-      {
-        name: "Band Chest Flyes",
-        video: "JIRDO1fvd-g",
-        muscle: "Chest",
-        purpose: "How this builds your physique",
-        inputType: "band",
-        startWeight: "20 lb band",
-        phases: {1:{sets:3,reps:"12-15",rest:"45s"},2:{sets:3,reps:"10-12",rest:"60s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"8-10",rest:"60s"}},
-        note: "Isolates the chest for deeper muscle activation and builds the inner-chest definition that pressing alone can't create.",
-        guide: "Anchor the band at chest height on a door anchor behind you. Face away from the door in a staggered stance, one foot forward for balance. Grab both handles, arms wide with a slight bend in elbows. Sweep your hands together in front of your chest like hugging a barrel. Squeeze your chest for 1 second. Open back up slowly with control — don't let the band yank you back."
-      },
-      {
-        name: "Dumbbell Shrugs",
-        video: "cJRVVxmytaM",
-        muscle: "Upper Traps",
-        purpose: "Why this matters for hiking",
-        startWeight: "25-40 lb dumbbells",
-        phases: {1:{sets:3,reps:"15-20",rest:"45s"},2:{sets:3,reps:"12-15",rest:"45s"},3:{sets:3,reps:"10-12",rest:"60s"},4:{sets:3,reps:"10-12",rest:"60s"}},
-        note: "Strengthens the upper traps that support a heavy pack on your shoulders over long miles without fatigue.",
-        guide: "Hold heavy dumbbells at your sides. Shrug your shoulders straight UP toward your ears as high as possible. Hold at the top for 1 second. Lower slowly. Don't roll your shoulders — straight up and down only."
-      },
-      {
-        name: "Dead Bug",
-        video: "JrcoGEZn6L4",
-        muscle: "Core, Stability",
-        purpose: "Why this matters for hiking",
-        startWeight: "Bodyweight",
-        inputType: "bodyweight",
-        phases: {1:{sets:2,reps:"8 each side",rest:"45s"},2:{sets:3,reps:"10 each side",rest:"45s"},3:{sets:3,reps:"12 each side",rest:"45s"},4:{sets:3,reps:"12 each side",rest:"45s"}},
-        note: "Trains deep core stability that keeps your spine protected and posture upright under a loaded pack over uneven ground.",
-        guide: "Lie on your back with arms extended toward the ceiling and knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — this is the key. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. Your lower back must stay glued to the floor throughout."
-      }
-    ]
+  {
+    name: "Inverted Rows",
+    videoStart: 263,
+    muscle: "Lats, Upper Back, Biceps",
+    purpose: "How this builds your physique",
+    startWeight: "Bodyweight",
+    inputType: "bodyweight",
+    phases: {1:{sets:3,reps:"8-15",rest:"90s"},2:{sets:3,reps:"8-15",rest:"90s"},3:{sets:3,reps:"8-15",rest:"90s"},4:{sets:3,reps:"8-15",rest:"90s"}},
+    note: "Builds the pulling strength foundation you need before progressing to pull-ups. Goal: 3 sets of 15 clean reps, then graduate to band-assisted neutral grip pull-ups.",
+    guide: "Set a bar (or sturdy surface) at about waist height. Grip the bar with palms facing each other (neutral) or overhand, hands just outside shoulder width. Walk your feet forward until your body is at an angle — the more horizontal you are, the harder it is. Start more upright if needed. Keep your body in a straight line from head to heels (like an upside-down plank). Pull your chest to the bar by driving elbows back and squeezing shoulder blades together. Lower with control (3 seconds down). Keep core braced throughout."
+  },
+  {
+    name: "Dumbbell Romanian Deadlift",
+    videoStart: 349,
+    muscle: "Hamstrings, Glutes, Lower Back",
+    purpose: "Why this builds strength",
+    startWeight: "20-30 lb dumbbells",
+    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    note: "Builds hamstring and glute strength that protects your lower back and knees. The single best injury-prevention exercise in the program.",
+    guide: "Stand hip-width apart, toes forward. Use the 'hop and stick' test to find your stance — where you land naturally is your sweet spot. Hold a dumbbell in each hand. Brace your core, push hips back with a slight knee bend. Keep the dumbbells tracking close to your legs as you lower. Stop when your hamstrings hit their limit — don't force extra range. Squeeze glutes to drive hips forward to stand."
+  },
+  {
+    name: "Band Seated Row",
+    videoStart: 457,
+    muscle: "Mid Back, Lats, Biceps",
+    purpose: "How this builds your physique",
+    inputType: "band",
+    startWeight: "50 lb band",
+    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    note: "Builds mid-back thickness and improves posture. Think of your hands as hooks — the pull comes from squeezing your shoulder blades together.",
+    guide: "Sit on the floor with legs extended, slight bend in knees. Loop the band around the soles of your feet. Sit tall, chest up, core braced. Pull the handles toward your lower chest, squeezing shoulder blades together hard at the end. Control the return. If you can't feel your back: practice letting shoulder blades slide forward, then squeezing them back together. Use lighter resistance and higher reps (10-15) for better muscle connection."
+  },
+  {
+    name: "Lateral Raise Superset",
+    videoStart: 535,
+    muscle: "Side Delts, Rear Delts",
+    purpose: "How this builds your physique",
+    startWeight: "5-10 lb dumbbells",
+    phases: {1:{sets:3,reps:"10-20",rest:"45s"},2:{sets:3,reps:"10-20",rest:"45s"},3:{sets:3,reps:"10-20",rest:"45s"},4:{sets:3,reps:"10-20",rest:"45s"}},
+    note: "Hits shoulders from multiple angles in one superset — side delts for width, rear delts for 3D roundness. Use light weight and go to failure.",
+    guide: "Part 1: Sit back on your incline bench (high incline). Hold light dumbbells, sweep arms up and out in a wide Y shape to failure. Part 2: Immediately flip chest-down on the bench. Raise dumbbells out to the sides and slightly back to target rear delts. Go to failure again. If chest-down is uncomfortable, place a towel or pad under your torso. Don't ego-lift — even 5-10 lbs is plenty."
+  },
+  {
+    name: "Dead Bug",
+    videoStart: 622,
+    muscle: "Core, Stability",
+    purpose: "Why this builds strength",
+    startWeight: "Bodyweight",
+    inputType: "bodyweight",
+    phases: {1:{sets:3,reps:"5 each side",rest:"30s"},2:{sets:3,reps:"5 each side",rest:"30s"},3:{sets:3,reps:"5 each side",rest:"30s"},4:{sets:3,reps:"5 each side",rest:"30s"}},
+    note: "Builds the deep core stability that makes your squats and deadlifts feel more solid. Flatten your lower back into the floor — that's the key.",
+    guide: "Lie on your back with arms extended toward the ceiling, knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — it must stay glued down. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. If your lower back lifts off the floor, you've gone too far."
+  },
+  {
+    name: "Incline Dumbbell Curls",
+    videoStart: 622,
+    muscle: "Biceps",
+    purpose: "How this builds your physique",
+    startWeight: "10-15 lb dumbbells",
+    phases: {1:{sets:3,reps:"8-12",rest:"45s"},2:{sets:3,reps:"8-12",rest:"45s"},3:{sets:3,reps:"8-12",rest:"45s"},4:{sets:3,reps:"8-12",rest:"45s"}},
+    note: "The incline position stretches the long head of the biceps more than standing curls, building a bigger peak. Superset with overhead extension for an arm pump.",
+    guide: "Set your bench to about 45-60 degrees. Sit back with your back pressed against the pad, feet planted. Let dumbbells hang with arms fully extended, palms facing forward. Keep your upper arms pinned — curl only at the elbows, dragging the weight toward your armpits. Squeeze at the top for 1-2 seconds. Lower slowly (3 seconds). Don't let your elbows drift forward."
+  },
+  {
+    name: "Dumbbell Overhead Extension",
+    videoStart: 622,
+    muscle: "Triceps",
+    purpose: "How this builds your physique",
+    startWeight: "15-20 lb dumbbell",
+    phases: {1:{sets:3,reps:"8-12",rest:"45s"},2:{sets:3,reps:"8-12",rest:"45s"},3:{sets:3,reps:"8-12",rest:"45s"},4:{sets:3,reps:"8-12",rest:"45s"}},
+    note: "Targets the long head of the triceps — the part that gives your arms thickness when viewed from the side. Superset with curls to save time.",
+    guide: "Sit on the bench or stand. Cup one end of a single dumbbell with both palms and raise it overhead until arms are fully extended. Keep elbows close to your ears and stationary. Slowly lower the dumbbell behind your head by bending at the elbows until your forearms touch your biceps or you feel a deep stretch. Press back up by straightening your elbows. Keep your core engaged to avoid arching your back."
   }
+];
+
+const PROGRAM = {
+  A: { name: "Monday — Full Body", badge: "full", exercises: FULL_BODY_EXERCISES },
+  B: { name: "Wednesday — Full Body", badge: "full", exercises: FULL_BODY_EXERCISES },
+  C: { name: "Friday — Full Body", badge: "full", exercises: FULL_BODY_EXERCISES }
 };
 
 // ========== BODYLASTICS BAND SYSTEM ==========
@@ -1032,25 +885,35 @@ function migrateBodyWeight(st) {
 }
 
 function migrateExerciseRenames(st) {
-  // Only rename exercises where the movement is essentially the same
   const renames = {
-    "Dumbbell Walking Lunges": "Stationary Reverse Lunges"
+    "Dumbbell Walking Lunges": "Stationary Reverse Lunges",
+    "Goblet Squat (Dumbbell)": "Goblet Squat"
   };
   const purge = [
     "Leg Press Machine", "Cable Woodchops", "Seated Cable Row",
     "Lat Pulldown Machine", "Cable Face Pulls", "Tricep Pushdowns (Cable)",
     "Band Tricep Pushdowns", "Leg Curl Machine", "Cable Chest Flyes"
   ];
-  // One-time cleanup: previous migration renamed gym exercises to home
-  // replacements, carrying over wrong weights. Only purge from PAST weeks
-  // to preserve any current-week data the user already logged.
   const homeGymPurge = [
     "Dumbbell Bulgarian Split Squats", "Band Woodchops", "Band Seated Row",
     "Band Lat Pulldown", "Band Face Pulls", "Dumbbell Skull Crushers",
     "Dumbbell Lying Leg Curls", "Band Chest Flyes"
   ];
+  const fullBodyPurge = [
+    "Stationary Reverse Lunges", "Dumbbell Standing Calf Raises",
+    "Plank Hold", "Dumbbell Bench Press (Flat)",
+    "Dumbbell Overhead Press (Seated)", "Dumbbell Incline Press",
+    "Dumbbell Bicep Curls", "Dumbbell Sumo Squat",
+    "Dumbbell Step-Ups (to bench)", "Dumbbell Lying Leg Curls",
+    "Dumbbell Lateral Raises", "Dumbbell Shrugs",
+    "Band Woodchops", "Band Lat Pulldown", "Band Face Pulls",
+    "Band Chest Flyes", "Dumbbell Skull Crushers",
+    "Dumbbell Bulgarian Split Squats",
+    "Band-Assisted Neutral Grip Pull-Ups"
+  ];
   if (!st || !st.logs) return st;
   const needsHomeGymClean = !st._homeGymMigrated;
+  const needsFullBodyClean = !st._fullBodyMigrated;
   const curWeek = st.currentWeek || 1;
   for (const [logKey, log] of Object.entries(st.logs)) {
     const weekMatch = logKey.match(/^W(\d+)/);
@@ -1063,6 +926,9 @@ function migrateExerciseRenames(st) {
       if (needsHomeGymClean && logWeek < curWeek) {
         for (const ex of homeGymPurge) { delete log.sets[ex]; }
       }
+      if (needsFullBodyClean && logWeek < curWeek) {
+        for (const ex of fullBodyPurge) { delete log.sets[ex]; }
+      }
     }
     if (log.difficulty && typeof log.difficulty === "object") {
       for (const [oldName, newName] of Object.entries(renames)) {
@@ -1072,9 +938,16 @@ function migrateExerciseRenames(st) {
       if (needsHomeGymClean && logWeek < curWeek) {
         for (const ex of homeGymPurge) { delete log.difficulty[ex]; }
       }
+      if (needsFullBodyClean && logWeek < curWeek) {
+        for (const ex of fullBodyPurge) { delete log.difficulty[ex]; }
+      }
     }
   }
   if (needsHomeGymClean) st._homeGymMigrated = true;
+  if (needsFullBodyClean) {
+    st.currentWeek = 1;
+    st._fullBodyMigrated = true;
+  }
   return st;
 }
 
@@ -1359,7 +1232,7 @@ function renderWorkouts() {
   const phaseIdx = getPhaseIndex(week);
 
   // Day sub-tabs
-  const dayLabels = { A: "Monday — Lower + Core", B: "Wednesday — Upper Body", C: "Friday — Hybrid" };
+  const dayLabels = { A: "Monday — Full Body", B: "Wednesday — Full Body", C: "Friday — Full Body" };
   const dayShort = { A: "Mon", B: "Wed", C: "Fri" };
   let html = `
     <div class="week-nav">
@@ -1996,7 +1869,7 @@ function renderGuide() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
       <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">How to Use This Program</h3>
       <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
-        This is a <strong style="color:var(--text);">16-week progressive program</strong> divided into 4 phases. Each phase automatically adjusts the number of sets, reps, and rest periods. Rate each exercise individually from 1-5 after your sets. The app will display personalized adjustment recommendations per exercise the following week.
+        This is a <strong style="color:var(--text);">16-week full-body program</strong> based on Jeremy Ethier's routine. Same 9 exercises, 3 days per week. Progress by increasing weight when exercises feel easy (rated 1-2). Rate each exercise individually from 1-5 after your sets.
       </p>
       <div class="highlight-box" style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:12px;">
         <strong>Rate each exercise 1-5 after your sets:</strong><br><br>
@@ -2015,28 +1888,23 @@ function renderGuide() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
       <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Starting Weight Guidelines</h3>
       <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
-        Since you haven't trained in 15 years, <strong style="color:var(--text);">start lighter than you think you should</strong>. 
-        Your muscles will remember faster than your joints and connective tissue can adapt. Here are rough starting points for Week 1:
+        <strong style="color:var(--text);">Start lighter than you think.</strong> Your muscles will adapt faster than your joints and connective tissue. Here are starting points for Week 1:
       </p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:12px;">
         <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Low Incline DB Press</td>
+          <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbells</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Goblet Squat</td>
-          <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbell</td>
+          <td style="padding:8px 0;color:var(--text-muted);">25 lb dumbbell</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 0;font-weight:600;">Inverted Rows</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight (adjust angle for difficulty)</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:8px 0;font-weight:600;">Dumbbell RDL</td>
-          <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbells</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Bulgarian Split Squats</td>
-          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight (add 10-15 lb dumbbells when ready)</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Stationary Reverse Lunges</td>
-          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight (add 10-15 lb dumbbells when ready)</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Dumbbell Bench Press</td>
           <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbells</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
@@ -2044,44 +1912,20 @@ function renderGuide() {
           <td style="padding:8px 0;color:var(--text-muted);">50 lb band (~25-35 lbs working)</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Overhead Press</td>
-          <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbells</td>
+          <td style="padding:8px 0;font-weight:600;">Lateral Raise Superset</td>
+          <td style="padding:8px 0;color:var(--text-muted);">5-10 lb dumbbells</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Band Lat Pulldown</td>
-          <td style="padding:8px 0;color:var(--text-muted);">50 lb band (~25-35 lbs working)</td>
+          <td style="padding:8px 0;font-weight:600;">Dead Bug</td>
+          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Lateral Raises</td>
+          <td style="padding:8px 0;font-weight:600;">Incline Dumbbell Curls</td>
           <td style="padding:8px 0;color:var(--text-muted);">10-15 lb dumbbells</td>
         </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Curls / Skull Crushers</td>
-          <td style="padding:8px 0;color:var(--text-muted);">10-20 lb dumbbells</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Sumo Squat</td>
-          <td style="padding:8px 0;color:var(--text-muted);">30-40 lb dumbbell</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Calf Raises</td>
-          <td style="padding:8px 0;color:var(--text-muted);">25-40 lb dumbbells</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Lying Leg Curls</td>
-          <td style="padding:8px 0;color:var(--text-muted);">5-10 lb dumbbell</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Band Woodchops</td>
-          <td style="padding:8px 0;color:var(--text-muted);">20 lb band (~10-14 lbs working)</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Band Face Pulls</td>
-          <td style="padding:8px 0;color:var(--text-muted);">20 lb band (~10-14 lbs working)</td>
-        </tr>
         <tr>
-          <td style="padding:8px 0;font-weight:600;">Band Chest Flyes</td>
-          <td style="padding:8px 0;color:var(--text-muted);">20 lb band (~10-14 lbs working)</td>
+          <td style="padding:8px 0;font-weight:600;">Overhead Extension</td>
+          <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbell</td>
         </tr>
       </table>
       <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">
@@ -2110,13 +1954,13 @@ function renderGuide() {
           <td style="padding:6px 0;">Band 2</td>
           <td style="padding:6px 0;">20 lbs</td>
           <td style="padding:6px 0;color:var(--text-muted);">~8-14 lbs</td>
-          <td style="padding:6px 0;color:var(--text-muted);">Face pulls, flyes, woodchops</td>
+          <td style="padding:6px 0;color:var(--text-muted);">Warm-up, stacking, pull-up assist</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:6px 0;">Band 3</td>
           <td style="padding:6px 0;">30 lbs</td>
           <td style="padding:6px 0;color:var(--text-muted);">~12-21 lbs</td>
-          <td style="padding:6px 0;color:var(--text-muted);">Woodchops, flyes progression</td>
+          <td style="padding:6px 0;color:var(--text-muted);">Lighter pull-up assist</td>
         </tr>
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:6px 0;">Band 4</td>
@@ -2143,16 +1987,15 @@ function renderGuide() {
     </div>
   `;
 
-  for (const dayKey of ["A", "B", "C"]) {
-    const day = PROGRAM[dayKey];
+  {
     html += `<div class="guide-section">
-      <div class="guide-header" onclick="toggleGuide('guide-${dayKey}')">
-        <h3>${day.name}</h3>
-        <span class="chevron" id="guide-chevron-${dayKey}">&#9654;</span>
+      <div class="guide-header" onclick="toggleGuide('guide-exercises')">
+        <h3>Full Body Workout — All Exercises</h3>
+        <span class="chevron" id="guide-chevron-exercises">&#9654;</span>
       </div>
-      <div class="guide-body" id="guide-${dayKey}">`;
+      <div class="guide-body" id="guide-exercises">`;
 
-    for (const ex of day.exercises) {
+    for (const ex of FULL_BODY_EXERCISES) {
       html += `
         <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
           <div style="font-weight:600;color:var(--text);font-size:15px;margin-bottom:4px;">${ex.name}</div>
@@ -2161,9 +2004,9 @@ function renderGuide() {
           <div class="highlight-box" style="margin-top:8px;font-size:13px;">
             <strong>${ex.purpose || "Why this matters"}:</strong> ${ex.note}
           </div>
-          ${ex.video ? `<button class="video-toggle" onclick="toggleVideo('vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}')">Watch Form Video</button>
+          ${ex.videoStart != null ? `<button class="video-toggle" onclick="toggleVideo('vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}')">Watch Form Video</button>
           <div class="video-container" id="vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}" style="display:none;">
-            <iframe data-src="https://www.youtube.com/embed/${ex.video}?rel=0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+            <iframe data-src="https://www.youtube.com/embed/${VIDEO_ID}?rel=0&start=${ex.videoStart}" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
           </div>` : ''}
         </div>`;
     }
