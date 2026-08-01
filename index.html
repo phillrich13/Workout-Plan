@@ -748,7 +748,7 @@ const FULL_BODY_EXERCISES = [
     supersetParts: ["Incline Dumbbell Curls", "Dumbbell Overhead Extension"],
     rx: {sets:3,reps:"8-12",rest:"90s"},
     note: "Supersets biceps and triceps back-to-back for a massive arm pump. The incline curl stretches the long head of the biceps for peak size, while the overhead extension hits the long head of the triceps for arm thickness.",
-    guide: "Part 1 — Incline Curls: Set bench to 45-60 degrees. Sit back, let dumbbells hang with palms forward. Keep upper arms pinned — curl only at the elbows. Squeeze at top, lower slowly (3 sec). Part 2 — Overhead Extension: Immediately grab one dumbbell, cup it with both palms, raise overhead. Keep elbows close to ears. Lower behind your head until you feel a deep stretch, then press back up. That's one round — no rest between parts, rest 45s after both."
+    guide: "Part 1 — Incline Curls: Set bench to 45-60 degrees. Sit back, let dumbbells hang with palms forward. Keep upper arms pinned — curl only at the elbows. Squeeze at top, lower slowly (3 sec). Part 2 — Overhead Extension: Keep the same dumbbells. Press them overhead with palms facing each other. Keep elbows close to ears and stationary. Lower behind your head until you feel a deep stretch, then press back up. That's one round — no rest between parts, rest 90s after both."
   }
 ];
 
@@ -1873,66 +1873,48 @@ function renderGuide() {
   const container = document.getElementById("tab-guide");
   let html = `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
-      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">How to Use This Program</h3>
-      <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
-        This is a <strong style="color:var(--text);">16-week full-body program</strong> based on Jeremy Ethier's routine. Same 9 exercises, 3 days per week. Progress by increasing weight when exercises feel easy (rated 1-2). Rate each exercise individually from 1-5 after your sets.
-      </p>
-      <div class="highlight-box" style="background:var(--accent-dim);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:12px;">
-        <strong>Rate each exercise 1-5 after your sets:</strong><br><br>
-        <strong>1 (Too Easy)</strong> — Could have done 5+ more reps with good form. Barely felt the muscle working.<br>
-        <span style="color:var(--green);font-size:12px;">&#8594; Increase weight next week</span><br><br>
-        <strong>2 (Moderate)</strong> — Had 2-3 reps left in the tank. Felt the muscle but wasn't challenged.<br>
-        <span style="color:var(--green);font-size:12px;">&#8594; Small increase next week (+2.5-5 lbs)</span><br><br>
-        <strong>3 (Just Right)</strong> — Could have done 1-2 more reps max. Last rep was tough but form stayed clean.<br>
-        <span style="color:var(--yellow);font-size:12px;">&#8594; Repeat same weight/reps</span><br><br>
-        <strong>4 (Hard)</strong> — Barely finished the last rep. Form started to break down.<br>
-        <span style="color:var(--red);font-size:12px;">&#8594; Same weight, fewer reps</span><br><br>
-        <strong>5 (Too Hard)</strong> — Couldn't complete all reps, or had to cheat/use momentum to finish.<br>
-        <span style="color:var(--red);font-size:12px;">&#8594; Reduce weight next week</span>
-      </div>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Warm-Up Routine (5 min before every session)</h3>
+      <p>Do these in order before every workout:</p>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li><strong>2 min</strong> — Brisk walk or easy bike to raise heart rate</li>
+        <li><strong>30 sec</strong> — Leg swings (front-to-back, 15 each leg)</li>
+        <li><strong>30 sec</strong> — Leg swings (side-to-side, 15 each leg)</li>
+        <li><strong>30 sec</strong> — Arm circles (15 forward, 15 backward)</li>
+        <li><strong>30 sec</strong> — Bodyweight squats (10 reps, slow and controlled)</li>
+        <li><strong>30 sec</strong> — Shoulder pass-throughs with a broomstick or band (if available)</li>
+      </ul>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
-      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Starting Weight Guidelines</h3>
-      <p style="font-size:14px;color:var(--text-muted);line-height:1.8;">
-        <strong style="color:var(--text);">Start lighter than you think.</strong> Your muscles will adapt faster than your joints and connective tissue. Here are starting points for Week 1:
-      </p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:12px;">
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Low Incline DB Press</td>
-          <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbells</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Goblet Squat</td>
-          <td style="padding:8px 0;color:var(--text-muted);">25 lb dumbbell</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Inverted Rows</td>
-          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight (adjust angle for difficulty)</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Dumbbell RDL</td>
-          <td style="padding:8px 0;color:var(--text-muted);">20-30 lb dumbbells</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Band Seated Row</td>
-          <td style="padding:8px 0;color:var(--text-muted);">50 lb band (~25-35 lbs working)</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Lateral Raise Superset</td>
-          <td style="padding:8px 0;color:var(--text-muted);">5-10 lb dumbbells</td>
-        </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Dead Bug</td>
-          <td style="padding:8px 0;color:var(--text-muted);">Bodyweight</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-weight:600;">Arm Superset (Curls + Extension)</td>
-          <td style="padding:8px 0;color:var(--text-muted);">10-15 lb dumbbells</td>
-        </tr>
-      </table>
-      <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">
-        <strong style="color:var(--text);">The test:</strong> If you can complete all prescribed reps with good form and rate it a 2 or 3, you picked the right weight. If it's a 1, go up. If it's a 4+, go down. No ego — the first 2 weeks are calibration.
-      </p>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:12px;">Full Body Workout — All Exercises</h3>
+  `;
+
+  for (const ex of FULL_BODY_EXERCISES) {
+    html += `
+      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--text);font-size:15px;margin-bottom:4px;">${ex.name}</div>
+        <div style="margin-bottom:4px;"><span class="muscle-tag">${ex.muscle}</span></div>
+        <p style="margin-top:8px;">${ex.guide}</p>
+        ${ex.videoStart != null ? `<button class="video-toggle" onclick="toggleVideo('vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}')">Watch Form Video</button>
+        <div class="video-container" id="vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}" style="display:none;">
+          <iframe data-src="https://www.youtube.com/embed/${VIDEO_ID}?rel=0&start=${ex.videoStart}" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+        </div>` : ''}
+      </div>`;
+  }
+
+  html += `
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Cool-Down / Stretch (5 min after every session)</h3>
+      <p>Hold each stretch for 30-45 seconds. Don't bounce.</p>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li><strong>Standing Quad Stretch</strong> — Pull heel to glute, keep knees together</li>
+        <li><strong>Standing Hamstring Stretch</strong> — Foot on bench, lean forward with flat back</li>
+        <li><strong>Hip Flexor Stretch</strong> — Half-kneeling lunge, push hips forward gently</li>
+        <li><strong>Cross-body Shoulder Stretch</strong> — Pull one arm across chest</li>
+        <li><strong>Overhead Tricep Stretch</strong> — Reach one hand down your back, press elbow with other hand</li>
+        <li><strong>Chest Doorway Stretch</strong> — Arm against a doorframe, turn body away</li>
+        <li><strong>Cat-Cow</strong> — On all fours, alternate arching and rounding your spine (10 reps)</li>
+      </ul>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
       <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Bodylastics Band Reference</h3>
@@ -1986,73 +1968,6 @@ function renderGuide() {
       <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">
         <strong style="color:var(--text);">Stacking examples:</strong> 10+30 = 40 lb combo &bull; 20+50 = 70 lb combo &bull; 30+50 = 80 lb combo &bull; 50+80 = 130 lb combo
       </p>
-    </div>
-  `;
-
-  {
-    html += `<div class="guide-section">
-      <div class="guide-header" onclick="toggleGuide('guide-exercises')">
-        <h3>Full Body Workout — All Exercises</h3>
-        <span class="chevron" id="guide-chevron-exercises">&#9654;</span>
-      </div>
-      <div class="guide-body" id="guide-exercises">`;
-
-    for (const ex of FULL_BODY_EXERCISES) {
-      html += `
-        <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
-          <div style="font-weight:600;color:var(--text);font-size:15px;margin-bottom:4px;">${ex.name}</div>
-          <div style="margin-bottom:4px;"><span class="muscle-tag">${ex.muscle}</span></div>
-          <p style="margin-top:8px;">${ex.guide}</p>
-          <div class="highlight-box" style="margin-top:8px;font-size:13px;">
-            <strong>${ex.purpose || "Why this matters"}:</strong> ${ex.note}
-          </div>
-          ${ex.videoStart != null ? `<button class="video-toggle" onclick="toggleVideo('vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}')">Watch Form Video</button>
-          <div class="video-container" id="vid-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}" style="display:none;">
-            <iframe data-src="https://www.youtube.com/embed/${VIDEO_ID}?rel=0&start=${ex.videoStart}" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
-          </div>` : ''}
-        </div>`;
-    }
-
-    html += `</div></div>`;
-  }
-
-  // Warmup and cooldown
-  html += `
-    <div class="guide-section">
-      <div class="guide-header" onclick="toggleGuide('guide-warmup')">
-        <h3>Warm-Up Routine (5 min before every session)</h3>
-        <span class="chevron" id="guide-chevron-warmup">&#9654;</span>
-      </div>
-      <div class="guide-body" id="guide-warmup">
-        <p>Do these in order before every workout:</p>
-        <ul>
-          <li><strong>2 min</strong> — Brisk walk or easy bike to raise heart rate</li>
-          <li><strong>30 sec</strong> — Leg swings (front-to-back, 15 each leg)</li>
-          <li><strong>30 sec</strong> — Leg swings (side-to-side, 15 each leg)</li>
-          <li><strong>30 sec</strong> — Arm circles (15 forward, 15 backward)</li>
-          <li><strong>30 sec</strong> — Bodyweight squats (10 reps, slow and controlled)</li>
-          <li><strong>30 sec</strong> — Shoulder pass-throughs with a broomstick or band (if available)</li>
-        </ul>
-        <p style="margin-top:8px;">Then do 1 warm-up set of each exercise at ~50% of your working weight before your first working set.</p>
-      </div>
-    </div>
-    <div class="guide-section">
-      <div class="guide-header" onclick="toggleGuide('guide-cooldown')">
-        <h3>Cool-Down / Stretch (5 min after every session)</h3>
-        <span class="chevron" id="guide-chevron-cooldown">&#9654;</span>
-      </div>
-      <div class="guide-body" id="guide-cooldown">
-        <p>Hold each stretch for 30-45 seconds. Don't bounce.</p>
-        <ul>
-          <li><strong>Standing Quad Stretch</strong> — Pull heel to glute, keep knees together</li>
-          <li><strong>Standing Hamstring Stretch</strong> — Foot on bench, lean forward with flat back</li>
-          <li><strong>Hip Flexor Stretch</strong> — Half-kneeling lunge, push hips forward gently</li>
-          <li><strong>Cross-body Shoulder Stretch</strong> — Pull one arm across chest</li>
-          <li><strong>Overhead Tricep Stretch</strong> — Reach one hand down your back, press elbow with other hand</li>
-          <li><strong>Chest Doorway Stretch</strong> — Arm against a doorframe, turn body away</li>
-          <li><strong>Cat-Cow</strong> — On all fours, alternate arching and rounding your spine (10 reps)</li>
-        </ul>
-      </div>
     </div>
   `;
 
