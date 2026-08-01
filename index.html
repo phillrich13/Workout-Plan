@@ -934,6 +934,7 @@ function migrateExerciseRenames(st) {
   }
   if (needsHomeGymClean) st._homeGymMigrated = true;
   if (needsFullBodyClean) {
+    st.logs = {};
     st.currentWeek = 1;
     st._fullBodyMigrated = true;
   }
