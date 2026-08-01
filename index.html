@@ -903,7 +903,7 @@ function migrateExerciseRenames(st) {
   ];
   if (!st || !st.logs) return st;
   const needsHomeGymClean = !st._homeGymMigrated;
-  const needsFullBodyClean = !st._fullBodyMigrated;
+  const needsFullBodyClean = (st._fullBodyVersion || 0) < 2;
   const curWeek = st.currentWeek || 1;
   for (const [logKey, log] of Object.entries(st.logs)) {
     const weekMatch = logKey.match(/^W(\d+)/);
@@ -938,6 +938,7 @@ function migrateExerciseRenames(st) {
     st.logs = {};
     st.currentWeek = 1;
     st._fullBodyMigrated = true;
+    st._fullBodyVersion = 2;
   }
 
   // Permanent cleanup: remove any exercise data not in the current program
