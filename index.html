@@ -2069,18 +2069,23 @@ function toggleGuide(id) {
 
 function toggleVideo(id) {
   const el = document.getElementById(id);
-  const btn = el.previousElementSibling;
   if (el.style.display === 'none') {
     const iframe = el.querySelector('iframe');
     if (iframe && !iframe.src && iframe.dataset.src) {
       iframe.src = iframe.dataset.src;
     }
     el.style.display = 'block';
-    btn.textContent = 'Hide Video';
   } else {
     el.style.display = 'none';
-    btn.textContent = 'Watch Form Video';
   }
+  // Update any toggle trigger that references this video
+  document.querySelectorAll(`[onclick*="'${id}'"]`).forEach(trigger => {
+    if (trigger.classList.contains('video-toggle')) {
+      trigger.textContent = el.style.display === 'none' ? 'Watch Form Video' : 'Hide Video';
+    } else if (trigger.classList.contains('form-video-link')) {
+      trigger.innerHTML = el.style.display === 'none' ? 'form &#9654;' : 'hide &#9654;';
+    }
+  });
 }
 
 // ========== TABS ==========
