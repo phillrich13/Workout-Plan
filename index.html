@@ -196,6 +196,40 @@
   .badge-lower { background: rgba(142,207,165,0.15); color: var(--sage); }
   .badge-upper { background: rgba(196,166,245,0.15); color: var(--purple); }
   .badge-full { background: var(--accent-dim); color: var(--accent); }
+  .superset-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--blue-dim);
+    color: var(--blue);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .superset-group-start td:first-child,
+  .superset-group-end td:first-child {
+    border-left: 3px solid var(--blue);
+    padding-left: 12px;
+  }
+  .superset-group-start td:first-child { border-radius: 3px 0 0 0; }
+  .superset-group-end td:first-child { border-radius: 0 0 0 3px; }
+  .superset-card-group {
+    border-left: 3px solid var(--blue);
+    border-radius: 3px;
+    margin-left: 4px;
+    padding-left: 8px;
+  }
+  .superset-card-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--blue);
+    padding: 6px 0 2px;
+  }
   .day-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
   .chevron { transition: transform 0.2s; font-size: 18px; }
   .chevron.open { transform: rotate(90deg); }
@@ -631,7 +665,7 @@ const VIDEO_ID = "n_YW24F5HGc";
 const FULL_BODY_EXERCISES = [
   {
     name: "Low Incline Dumbbell Press",
-    videoStart: 41,
+    videoStart: 90,
     muscle: "Chest, Shoulders, Triceps",
     purpose: "How this builds your physique",
     startWeight: "15-20 lb dumbbells",
@@ -641,7 +675,7 @@ const FULL_BODY_EXERCISES = [
   },
   {
     name: "Goblet Squat",
-    videoStart: 139,
+    videoStart: 175,
     muscle: "Quads, Glutes, Core",
     purpose: "Why this builds strength",
     startWeight: "25 lb dumbbell",
@@ -651,7 +685,7 @@ const FULL_BODY_EXERCISES = [
   },
   {
     name: "Inverted Rows",
-    videoStart: 263,
+    videoStart: 298,
     muscle: "Lats, Upper Back, Biceps",
     purpose: "How this builds your physique",
     startWeight: "Bodyweight",
@@ -662,7 +696,7 @@ const FULL_BODY_EXERCISES = [
   },
   {
     name: "Dumbbell Romanian Deadlift",
-    videoStart: 349,
+    videoStart: 396,
     muscle: "Hamstrings, Glutes, Lower Back",
     purpose: "Why this builds strength",
     startWeight: "20-30 lb dumbbells",
@@ -672,7 +706,7 @@ const FULL_BODY_EXERCISES = [
   },
   {
     name: "Band Seated Row",
-    videoStart: 457,
+    videoStart: 476,
     muscle: "Mid Back, Lats, Biceps",
     purpose: "How this builds your physique",
     inputType: "band",
@@ -683,17 +717,19 @@ const FULL_BODY_EXERCISES = [
   },
   {
     name: "Lateral Raise Superset",
-    videoStart: 535,
+    videoStart: 560,
     muscle: "Side Delts, Rear Delts",
     purpose: "How this builds your physique",
     startWeight: "5-10 lb dumbbells",
+    superset: "self",
+    supersetParts: ["Incline Lateral Raise (Y-sweep)", "Chest-Down Rear Raise"],
     rx: {sets:3,reps:"10-20",rest:"45s"},
     note: "Hits shoulders from multiple angles in one superset — side delts for width, rear delts for 3D roundness. Use light weight and go to failure.",
     guide: "Part 1: Sit back on your incline bench (high incline). Hold light dumbbells, sweep arms up and out in a wide Y shape to failure. Part 2: Immediately flip chest-down on the bench. Raise dumbbells out to the sides and slightly back to target rear delts. Go to failure again. If chest-down is uncomfortable, place a towel or pad under your torso. Don't ego-lift — even 5-10 lbs is plenty."
   },
   {
     name: "Dead Bug",
-    videoStart: 622,
+    videoStart: 634,
     muscle: "Core, Stability",
     purpose: "Why this builds strength",
     startWeight: "Bodyweight",
@@ -703,24 +739,16 @@ const FULL_BODY_EXERCISES = [
     guide: "Lie on your back with arms extended toward the ceiling, knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — it must stay glued down. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. If your lower back lifts off the floor, you've gone too far."
   },
   {
-    name: "Incline Dumbbell Curls",
-    videoStart: 622,
-    muscle: "Biceps",
+    name: "Arm Superset (Curls + Extension)",
+    videoStart: 683,
+    muscle: "Biceps, Triceps",
     purpose: "How this builds your physique",
     startWeight: "10-15 lb dumbbells",
+    superset: "self",
+    supersetParts: ["Incline Dumbbell Curls", "Dumbbell Overhead Extension"],
     rx: {sets:3,reps:"8-12",rest:"45s"},
-    note: "The incline position stretches the long head of the biceps more than standing curls, building a bigger peak. Superset with overhead extension for an arm pump.",
-    guide: "Set your bench to about 45-60 degrees. Sit back with your back pressed against the pad, feet planted. Let dumbbells hang with arms fully extended, palms facing forward. Keep your upper arms pinned — curl only at the elbows, dragging the weight toward your armpits. Squeeze at the top for 1-2 seconds. Lower slowly (3 seconds). Don't let your elbows drift forward."
-  },
-  {
-    name: "Dumbbell Overhead Extension",
-    videoStart: 622,
-    muscle: "Triceps",
-    purpose: "How this builds your physique",
-    startWeight: "15-20 lb dumbbell",
-    rx: {sets:3,reps:"8-12",rest:"45s"},
-    note: "Targets the long head of the triceps — the part that gives your arms thickness when viewed from the side. Superset with curls to save time.",
-    guide: "Sit on the bench or stand. Cup one end of a single dumbbell with both palms and raise it overhead until arms are fully extended. Keep elbows close to your ears and stationary. Slowly lower the dumbbell behind your head by bending at the elbows until your forearms touch your biceps or you feel a deep stretch. Press back up by straightening your elbows. Keep your core engaged to avoid arching your back."
+    note: "Supersets biceps and triceps back-to-back for a massive arm pump. The incline curl stretches the long head of the biceps for peak size, while the overhead extension hits the long head of the triceps for arm thickness.",
+    guide: "Part 1 — Incline Curls: Set bench to 45-60 degrees. Sit back, let dumbbells hang with palms forward. Keep upper arms pinned — curl only at the elbows. Squeeze at top, lower slowly (3 sec). Part 2 — Overhead Extension: Immediately grab one dumbbell, cup it with both palms, raise overhead. Keep elbows close to ears. Lower behind your head until you feel a deep stretch, then press back up. That's one round — no rest between parts, rest 45s after both."
   }
 ];
 
@@ -869,7 +897,8 @@ function migrateExerciseRenames(st) {
     "Dumbbell Lateral Raises", "Dumbbell Shrugs",
     "Band Woodchops", "Band Lat Pulldown", "Band Face Pulls",
     "Band Chest Flyes", "Dumbbell Skull Crushers",
-    "Dumbbell Bulgarian Split Squats", "Band-Assisted Neutral Grip Pull-Ups"
+    "Dumbbell Bulgarian Split Squats", "Band-Assisted Neutral Grip Pull-Ups",
+    "Incline Dumbbell Curls", "Dumbbell Overhead Extension"
   ];
   if (!st || !st.logs) return st;
   const needsHomeGymClean = !st._homeGymMigrated;
@@ -1253,7 +1282,9 @@ function renderWorkouts() {
       <th>Actual Reps</th>
     </tr></thead><tbody>`;
 
-  for (const ex of day.exercises) {
+  const exercises = day.exercises;
+  for (let ei = 0; ei < exercises.length; ei++) {
+    const ex = exercises[ei];
     const rx = ex.rx;
     const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
 
@@ -1301,9 +1332,19 @@ function renderWorkouts() {
       const cls = exRating === r ? `rated-${r}` : '';
       return `<button class="ex-rate-btn ${cls}" data-rating-ex="${ex.name}" data-rating="${r}" onclick="toggleRatingUI(this)">${r}</button>`;
     }).join('');
-    html += `<tr>
+
+    const ssGroup = ex.superset && ex.superset !== "self";
+    const ssStart = ssGroup && (ei === 0 || exercises[ei-1].superset !== ex.superset);
+    const ssEnd = ssGroup && (ei === exercises.length-1 || exercises[ei+1].superset !== ex.superset);
+    const ssSelf = ex.superset === "self";
+    const ssRowClass = ssStart ? 'superset-group-start' : ssEnd ? 'superset-group-end' : (ssGroup ? 'superset-group-start superset-group-end' : '');
+    const ssBadge = (ssSelf || ssStart) ? '<span class="superset-badge">Superset</span>' : (ssGroup ? '<span class="superset-badge" style="background:transparent;color:var(--blue);padding:0;font-size:9px;">&#8593; superset</span>' : '');
+
+    const ssPartsHtml = ex.supersetParts ? ex.supersetParts.map(p => `<div style="font-size:11px;color:var(--text-muted);padding-left:8px;">&#8226; ${p}</div>`).join('') : '';
+    html += `<tr class="${ssRowClass} ${ssSelf ? 'superset-group-start superset-group-end' : ''}">
       <td>
-        <div class="exercise-name">${ex.name}</div>
+        <div class="exercise-name">${ex.name}${ssBadge}</div>
+        ${ssPartsHtml}
         ${weightHintDesktop}
         <div class="ex-rating">
           <span class="ex-rating-label">Rate:</span>
@@ -1319,7 +1360,9 @@ function renderWorkouts() {
 
   // Mobile: card layout
   html += `<div class="exercise-cards open">`;
-  for (const ex of day.exercises) {
+  let mobileSSOpen = false;
+  for (let ei = 0; ei < day.exercises.length; ei++) {
+    const ex = day.exercises[ei];
     const rx = ex.rx;
     const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
     const iTypeMobile = ex.inputType || "weighted";
@@ -1379,10 +1422,20 @@ function renderWorkouts() {
       const cls = exRatingMobile === r ? `rated-${r}` : '';
       return `<button class="ex-rate-btn ${cls}" data-rating-ex="${ex.name}" data-rating="${r}" onclick="toggleRatingUI(this)">${r}</button>`;
     }).join('');
+    const mSSGroup = ex.superset && ex.superset !== "self";
+    const mSSStart = mSSGroup && (ei === 0 || day.exercises[ei-1].superset !== ex.superset);
+    const mSSEnd = mSSGroup && (ei === day.exercises.length-1 || day.exercises[ei+1].superset !== ex.superset);
+    const mSSSelf = ex.superset === "self";
+
+    if (mSSStart) html += `<div class="superset-card-group"><div class="superset-card-label">&#x21C4; Superset — no rest between</div>`;
+    if (mSSSelf) html += `<div class="superset-card-group" style="border-left-color:var(--blue);"><div class="superset-card-label">&#x21C4; Superset</div>`;
+
+    const mSSPartsHtml = ex.supersetParts ? ex.supersetParts.map(p => `<div style="font-size:11px;color:var(--text-muted);padding-left:8px;">&#8226; ${p}</div>`).join('') : '';
     html += `<div class="exercise-card">
       <div class="exercise-card-header">
         <div>
           <div class="exercise-name">${ex.name}</div>
+          ${mSSPartsHtml}
           <span class="muscle-tag">${ex.muscle}</span>
           ${weightHintMobile}
         </div>
@@ -1394,6 +1447,8 @@ function renderWorkouts() {
         ${ratingBtnsMobile}
       </div>
     </div>`;
+
+    if (mSSEnd || mSSSelf) html += `</div>`;
   }
   html += `</div>
     <div style="padding:16px 20px;border-top:1px solid var(--border);text-align:center;">
@@ -1839,13 +1894,9 @@ function renderGuide() {
           <td style="padding:8px 0;font-weight:600;">Dead Bug</td>
           <td style="padding:8px 0;color:var(--text-muted);">Bodyweight</td>
         </tr>
-        <tr style="border-bottom:1px solid var(--border);">
-          <td style="padding:8px 0;font-weight:600;">Incline Dumbbell Curls</td>
-          <td style="padding:8px 0;color:var(--text-muted);">10-15 lb dumbbells</td>
-        </tr>
         <tr>
-          <td style="padding:8px 0;font-weight:600;">Overhead Extension</td>
-          <td style="padding:8px 0;color:var(--text-muted);">15-20 lb dumbbell</td>
+          <td style="padding:8px 0;font-weight:600;">Arm Superset (Curls + Extension)</td>
+          <td style="padding:8px 0;color:var(--text-muted);">10-15 lb dumbbells</td>
         </tr>
       </table>
       <p style="font-size:13px;color:var(--text-muted);margin-top:12px;">
