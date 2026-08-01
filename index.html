@@ -723,7 +723,7 @@ const FULL_BODY_EXERCISES = [
     startWeight: "5-10 lb dumbbells",
     superset: "self",
     supersetParts: ["Incline Lateral Raise (Y-sweep)", "Chest-Down Rear Raise"],
-    rx: {sets:3,reps:"10-20",rest:"45s"},
+    rx: {sets:3,reps:"10-20",rest:"90s"},
     note: "Hits shoulders from multiple angles in one superset — side delts for width, rear delts for 3D roundness. Use light weight and go to failure.",
     guide: "Part 1: Sit back on your incline bench (high incline). Hold light dumbbells, sweep arms up and out in a wide Y shape to failure. Part 2: Immediately flip chest-down on the bench. Raise dumbbells out to the sides and slightly back to target rear delts. Go to failure again. If chest-down is uncomfortable, place a towel or pad under your torso. Don't ego-lift — even 5-10 lbs is plenty."
   },
@@ -746,7 +746,7 @@ const FULL_BODY_EXERCISES = [
     startWeight: "10-15 lb dumbbells",
     superset: "self",
     supersetParts: ["Incline Dumbbell Curls", "Dumbbell Overhead Extension"],
-    rx: {sets:3,reps:"8-12",rest:"45s"},
+    rx: {sets:3,reps:"8-12",rest:"90s"},
     note: "Supersets biceps and triceps back-to-back for a massive arm pump. The incline curl stretches the long head of the biceps for peak size, while the overhead extension hits the long head of the triceps for arm thickness.",
     guide: "Part 1 — Incline Curls: Set bench to 45-60 degrees. Sit back, let dumbbells hang with palms forward. Keep upper arms pinned — curl only at the elbows. Squeeze at top, lower slowly (3 sec). Part 2 — Overhead Extension: Immediately grab one dumbbell, cup it with both palms, raise overhead. Keep elbows close to ears. Lower behind your head until you feel a deep stretch, then press back up. That's one round — no rest between parts, rest 45s after both."
   }
@@ -1360,10 +1360,16 @@ function renderWorkouts() {
     const ssBadge = (ssSelf || ssStart) ? '<span class="superset-badge">Superset</span>' : (ssGroup ? '<span class="superset-badge" style="background:transparent;color:var(--blue);padding:0;font-size:9px;">&#8593; superset</span>' : '');
 
     const ssPartsHtml = ex.supersetParts ? ex.supersetParts.map(p => `<div style="font-size:11px;color:var(--text-muted);padding-left:8px;">&#8226; ${p}</div>`).join('') : '';
+    const vidId = `wk-vid-${dayKey}-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}`;
+    const formLink = ex.videoStart != null ? `<a href="#" class="form-video-link" onclick="event.preventDefault();toggleVideo('${vidId}')" style="font-size:10px;color:var(--blue);text-decoration:none;margin-left:6px;">form &#9654;</a>` : '';
+    const formVideo = ex.videoStart != null ? `<div class="video-container" id="${vidId}" style="display:none;margin:6px 0;">
+      <iframe data-src="https://www.youtube.com/embed/${VIDEO_ID}?rel=0&start=${ex.videoStart}" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+    </div>` : '';
     html += `<tr class="${ssRowClass} ${ssSelf ? 'superset-group-start superset-group-end' : ''}">
       <td>
-        <div class="exercise-name">${ex.name}${ssBadge}</div>
+        <div class="exercise-name">${ex.name}${ssBadge}${formLink}</div>
         ${ssPartsHtml}
+        ${formVideo}
         ${weightHintDesktop}
         <div class="ex-rating">
           <span class="ex-rating-label">Rate:</span>
@@ -1450,11 +1456,17 @@ function renderWorkouts() {
     if (mSSSelf) html += `<div class="superset-card-group" style="border-left-color:var(--blue);"><div class="superset-card-label">&#x21C4; Superset</div>`;
 
     const mSSPartsHtml = ex.supersetParts ? ex.supersetParts.map(p => `<div style="font-size:11px;color:var(--text-muted);padding-left:8px;">&#8226; ${p}</div>`).join('') : '';
+    const mVidId = `wk-mvid-${dayKey}-${ex.name.replace(/[^a-zA-Z0-9]/g,'')}`;
+    const mFormLink = ex.videoStart != null ? `<a href="#" class="form-video-link" onclick="event.preventDefault();toggleVideo('${mVidId}')" style="font-size:10px;color:var(--blue);text-decoration:none;margin-left:6px;">form &#9654;</a>` : '';
+    const mFormVideo = ex.videoStart != null ? `<div class="video-container" id="${mVidId}" style="display:none;margin:6px 0;">
+      <iframe data-src="https://www.youtube.com/embed/${VIDEO_ID}?rel=0&start=${ex.videoStart}" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+    </div>` : '';
     html += `<div class="exercise-card">
       <div class="exercise-card-header">
         <div>
-          <div class="exercise-name">${ex.name}</div>
+          <div class="exercise-name">${ex.name}${mFormLink}</div>
           ${mSSPartsHtml}
+          ${mFormVideo}
           <span class="muscle-tag">${ex.muscle}</span>
           ${weightHintMobile}
         </div>
