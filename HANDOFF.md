@@ -65,15 +65,8 @@ Based on Jeremy Ethier's "The ONLY Workout You Need For 2026" routine. All 3 day
 
 `PROGRAM.A`, `PROGRAM.B`, and `PROGRAM.C` all reference the same `FULL_BODY_EXERCISES` array. Day names are "Monday — Full Body", "Wednesday — Full Body", "Friday — Full Body". Badge is `"full"` for all three.
 
-### Four Phases (4 weeks each)
-Progression is simple — same sets/reps throughout, progress by increasing weight when exercises feel easy.
-
-| Phase | Weeks | Days/Week | Description |
-|-------|-------|-----------|-------------|
-| Foundation | 1-4 | 3 | Learn movement patterns. Light weights, higher reps, focus on form. |
-| Building | 5-8 | 3 | Increase loads gradually. Movements should feel more natural. |
-| Strength | 9-12 | 3 | Heavier loads, aim for the lower end of rep ranges. |
-| Performance | 13-16 | 3 | Peak intensity. Challenge yourself on every set. |
+### Progression
+No phases — same sets/reps throughout. Each exercise has a flat `rx` property (e.g., `{sets:3, reps:"10-15", rest:"60s"}`). Progression comes entirely from the adaptive difficulty system: rate each exercise 1-5, and the app suggests weight adjustments for the following week. The program runs for 16 weeks.
 
 ### Adaptive Difficulty System (Per-Exercise)
 After each exercise, the user rates difficulty 1-5 via inline buttons. Ratings are stored per-exercise in the `difficulty` object (keyed by exercise name). The Exercise Guide tab includes descriptive context for each rating level (what it should feel like physically) along with the adjustment recommendation.
@@ -104,8 +97,8 @@ Each exercise has a `startWeight` property. During weeks 1-2 (and only when no a
 ### Exercise Input Types
 Each exercise has an optional `inputType` field:
 - **`"weighted"` (default):** Shows weight (lbs) × reps inputs per set
-- **`"timed"`:** Shows a static dash for weight, seconds input for duration (e.g., Plank Hold)
-- **`"bodyweight"`:** Shows a static dash for weight, reps input only (e.g., Dead Bug)
+- **`"bodyweight"`:** Shows a static dash for weight, reps input only (e.g., Dead Bug, Inverted Rows)
+- **`"band"`:** Shows weight (lbs) inputs mapped to Bodylastics band system
 
 ---
 
@@ -155,7 +148,7 @@ Each exercise has an optional `inputType` field:
 
 ### Tabs
 1. **Workouts** — Main logging interface with day sub-tabs (Mon/Wed/Fri)
-2. **Progress** — Workout count, streak, total weight loss (with % body weight), phase progression bars, SVG weight-over-time chart, recent history
+2. **Progress** — Workout count, streak, total weight loss (with % body weight), SVG weight-over-time chart, recent history
 3. **Exercise Guide** — Collapsible sections with full form instructions, warm-up/cool-down routines
 
 ### Workout Tab Details
@@ -229,12 +222,7 @@ Each exercise object in the `PROGRAM` constant:
   purpose: "How this builds your physique",   // or "Why this builds strength"
   startWeight: "15-20 lb dumbbells",           // Shown when no adaptive data
   inputType: "weighted",                       // "weighted" (default), or "bodyweight"
-  phases: {
-    1: { sets: 3, reps: "10-15", rest: "60s" },
-    2: { sets: 3, reps: "10-15", rest: "60s" },
-    3: { sets: 3, reps: "10-15", rest: "60s" },
-    4: { sets: 3, reps: "10-15", rest: "60s" }
-  },
+  rx: { sets: 3, reps: "10-15", rest: "60s" },
   note: "Outcome-focused description",
   guide: "Full form instructions for the Exercise Guide tab"
 }

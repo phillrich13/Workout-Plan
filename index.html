@@ -591,11 +591,6 @@
         <div class="streak-label">consecutive weeks</div>
       </div>
       <div class="progress-card">
-        <h3>Current Phase</h3>
-        <div class="streak-number" id="currentPhase" style="font-size:24px;">Foundation</div>
-        <div class="streak-label" id="phaseWeeks">Weeks 1-4</div>
-      </div>
-      <div class="progress-card">
         <h3>Total Weight Loss</h3>
         <div class="streak-number" id="totalWeightLoss" style="color:var(--green);">—</div>
         <div class="streak-label" id="weightLossPct">—</div>
@@ -610,39 +605,6 @@
       <ul class="history-list" id="historyList">
         <li class="history-item" style="color:var(--text-muted);">No workouts logged yet. Complete your first session!</li>
       </ul>
-    </div>
-    <div class="progress-card">
-      <h3>Phase Progression</h3>
-      <div style="margin-top:12px;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:120px;font-size:13px;font-weight:600;">Foundation</div>
-          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
-            <div id="phase1Bar" style="height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width 0.5s;"></div>
-          </div>
-          <div style="font-size:12px;color:var(--text-muted);">Wk 1-4</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:120px;font-size:13px;font-weight:600;">Building</div>
-          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
-            <div id="phase2Bar" style="height:100%;background:var(--blue);border-radius:4px;width:0%;transition:width 0.5s;"></div>
-          </div>
-          <div style="font-size:12px;color:var(--text-muted);">Wk 5-8</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:120px;font-size:13px;font-weight:600;">Strength</div>
-          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
-            <div id="phase3Bar" style="height:100%;background:var(--green);border-radius:4px;width:0%;transition:width 0.5s;"></div>
-          </div>
-          <div style="font-size:12px;color:var(--text-muted);">Wk 9-12</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:120px;font-size:13px;font-weight:600;">Performance</div>
-          <div style="flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
-            <div id="phase4Bar" style="height:100%;background:var(--purple);border-radius:4px;width:0%;transition:width 0.5s;"></div>
-          </div>
-          <div style="font-size:12px;color:var(--text-muted);">Wk 13-16</div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -663,13 +625,6 @@
 
 <script>
 // ========== PROGRAM DEFINITION ==========
-const PHASES = [
-  { name: "Foundation", weeks: [1,2,3,4], description: "Learn each movement pattern. Light weights, higher reps, focus on form. Progress by adding weight when exercises feel easy." },
-  { name: "Building", weeks: [5,6,7,8], description: "Increase loads gradually. Same exercises — push intensity via weight. Movements should feel more natural." },
-  { name: "Strength", weeks: [9,10,11,12], description: "Heavier loads, aim for the lower end of rep ranges. Focus on progressive overload." },
-  { name: "Performance", weeks: [13,14,15,16], description: "Peak intensity. Challenge yourself on every set. Consider reducing band assistance on pull-ups." }
-];
-
 // Home gym: Bowflex SelectTech 552 dumbbells, adjustable bench, resistance bands w/ door anchor, pull-up bar
 // Program: Jeremy Ethier — The ONLY Workout You Need For 2026 (youtube.com/watch?v=n_YW24F5HGc)
 const VIDEO_ID = "n_YW24F5HGc";
@@ -680,7 +635,7 @@ const FULL_BODY_EXERCISES = [
     muscle: "Chest, Shoulders, Triceps",
     purpose: "How this builds your physique",
     startWeight: "15-20 lb dumbbells",
-    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    rx: {sets:3,reps:"10-15",rest:"60s"},
     note: "Builds your entire chest like a flat press, plus the bonus of developing your upper chest, shoulders, and triceps in one movement.",
     guide: "Set your bench 2 notches up from flat (your sternum angles back). Grab dumbbells, kick them up to starting position. Tuck elbows slightly — press in an arrow shape, not a T — for a deeper chest stretch and less shoulder stress. Lower until you feel a stretch across your chest, then press up. Keep feet flat, slight arch in lower back."
   },
@@ -690,7 +645,7 @@ const FULL_BODY_EXERCISES = [
     muscle: "Quads, Glutes, Core",
     purpose: "Why this builds strength",
     startWeight: "25 lb dumbbell",
-    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    rx: {sets:3,reps:"10-15",rest:"60s"},
     note: "Holding the weight at your chest forces you to brace your core and fixes squat form instantly. You can go surprisingly heavy. Goal: work up to half your bodyweight for 10 reps.",
     guide: "Hold a dumbbell vertically against your chest with both hands. Try three stances to find what feels natural: shoulder-width with slight toe-out, narrow with toes forward, or wider with toes way out. Push hips back, bend knees, lower until thighs are at least parallel. Drive through heels to stand. Keep torso upright throughout."
   },
@@ -701,7 +656,7 @@ const FULL_BODY_EXERCISES = [
     purpose: "How this builds your physique",
     startWeight: "Bodyweight",
     inputType: "bodyweight",
-    phases: {1:{sets:3,reps:"8-15",rest:"90s"},2:{sets:3,reps:"8-15",rest:"90s"},3:{sets:3,reps:"8-15",rest:"90s"},4:{sets:3,reps:"8-15",rest:"90s"}},
+    rx: {sets:3,reps:"8-15",rest:"90s"},
     note: "Builds the pulling strength foundation you need before progressing to pull-ups. Goal: 3 sets of 15 clean reps, then graduate to band-assisted neutral grip pull-ups.",
     guide: "Set a bar (or sturdy surface) at about waist height. Grip the bar with palms facing each other (neutral) or overhand, hands just outside shoulder width. Walk your feet forward until your body is at an angle — the more horizontal you are, the harder it is. Start more upright if needed. Keep your body in a straight line from head to heels (like an upside-down plank). Pull your chest to the bar by driving elbows back and squeezing shoulder blades together. Lower with control (3 seconds down). Keep core braced throughout."
   },
@@ -711,7 +666,7 @@ const FULL_BODY_EXERCISES = [
     muscle: "Hamstrings, Glutes, Lower Back",
     purpose: "Why this builds strength",
     startWeight: "20-30 lb dumbbells",
-    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    rx: {sets:3,reps:"10-15",rest:"60s"},
     note: "Builds hamstring and glute strength that protects your lower back and knees. The single best injury-prevention exercise in the program.",
     guide: "Stand hip-width apart, toes forward. Use the 'hop and stick' test to find your stance — where you land naturally is your sweet spot. Hold a dumbbell in each hand. Brace your core, push hips back with a slight knee bend. Keep the dumbbells tracking close to your legs as you lower. Stop when your hamstrings hit their limit — don't force extra range. Squeeze glutes to drive hips forward to stand."
   },
@@ -722,7 +677,7 @@ const FULL_BODY_EXERCISES = [
     purpose: "How this builds your physique",
     inputType: "band",
     startWeight: "50 lb band",
-    phases: {1:{sets:3,reps:"10-15",rest:"60s"},2:{sets:3,reps:"10-15",rest:"60s"},3:{sets:3,reps:"10-15",rest:"60s"},4:{sets:3,reps:"10-15",rest:"60s"}},
+    rx: {sets:3,reps:"10-15",rest:"60s"},
     note: "Builds mid-back thickness and improves posture. Think of your hands as hooks — the pull comes from squeezing your shoulder blades together.",
     guide: "Sit on the floor with legs extended, slight bend in knees. Loop the band around the soles of your feet. Sit tall, chest up, core braced. Pull the handles toward your lower chest, squeezing shoulder blades together hard at the end. Control the return. If you can't feel your back: practice letting shoulder blades slide forward, then squeezing them back together. Use lighter resistance and higher reps (10-15) for better muscle connection."
   },
@@ -732,7 +687,7 @@ const FULL_BODY_EXERCISES = [
     muscle: "Side Delts, Rear Delts",
     purpose: "How this builds your physique",
     startWeight: "5-10 lb dumbbells",
-    phases: {1:{sets:3,reps:"10-20",rest:"45s"},2:{sets:3,reps:"10-20",rest:"45s"},3:{sets:3,reps:"10-20",rest:"45s"},4:{sets:3,reps:"10-20",rest:"45s"}},
+    rx: {sets:3,reps:"10-20",rest:"45s"},
     note: "Hits shoulders from multiple angles in one superset — side delts for width, rear delts for 3D roundness. Use light weight and go to failure.",
     guide: "Part 1: Sit back on your incline bench (high incline). Hold light dumbbells, sweep arms up and out in a wide Y shape to failure. Part 2: Immediately flip chest-down on the bench. Raise dumbbells out to the sides and slightly back to target rear delts. Go to failure again. If chest-down is uncomfortable, place a towel or pad under your torso. Don't ego-lift — even 5-10 lbs is plenty."
   },
@@ -743,7 +698,7 @@ const FULL_BODY_EXERCISES = [
     purpose: "Why this builds strength",
     startWeight: "Bodyweight",
     inputType: "bodyweight",
-    phases: {1:{sets:3,reps:"5 each side",rest:"30s"},2:{sets:3,reps:"5 each side",rest:"30s"},3:{sets:3,reps:"5 each side",rest:"30s"},4:{sets:3,reps:"5 each side",rest:"30s"}},
+    rx: {sets:3,reps:"5 each side",rest:"30s"},
     note: "Builds the deep core stability that makes your squats and deadlifts feel more solid. Flatten your lower back into the floor — that's the key.",
     guide: "Lie on your back with arms extended toward the ceiling, knees bent at 90 degrees (shins parallel to floor). Press your lower back hard into the floor — it must stay glued down. Slowly extend your right arm overhead and left leg out straight, hovering just above the floor. Return to start and repeat on the other side. If your lower back lifts off the floor, you've gone too far."
   },
@@ -753,7 +708,7 @@ const FULL_BODY_EXERCISES = [
     muscle: "Biceps",
     purpose: "How this builds your physique",
     startWeight: "10-15 lb dumbbells",
-    phases: {1:{sets:3,reps:"8-12",rest:"45s"},2:{sets:3,reps:"8-12",rest:"45s"},3:{sets:3,reps:"8-12",rest:"45s"},4:{sets:3,reps:"8-12",rest:"45s"}},
+    rx: {sets:3,reps:"8-12",rest:"45s"},
     note: "The incline position stretches the long head of the biceps more than standing curls, building a bigger peak. Superset with overhead extension for an arm pump.",
     guide: "Set your bench to about 45-60 degrees. Sit back with your back pressed against the pad, feet planted. Let dumbbells hang with arms fully extended, palms facing forward. Keep your upper arms pinned — curl only at the elbows, dragging the weight toward your armpits. Squeeze at the top for 1-2 seconds. Lower slowly (3 seconds). Don't let your elbows drift forward."
   },
@@ -763,7 +718,7 @@ const FULL_BODY_EXERCISES = [
     muscle: "Triceps",
     purpose: "How this builds your physique",
     startWeight: "15-20 lb dumbbell",
-    phases: {1:{sets:3,reps:"8-12",rest:"45s"},2:{sets:3,reps:"8-12",rest:"45s"},3:{sets:3,reps:"8-12",rest:"45s"},4:{sets:3,reps:"8-12",rest:"45s"}},
+    rx: {sets:3,reps:"8-12",rest:"45s"},
     note: "Targets the long head of the triceps — the part that gives your arms thickness when viewed from the side. Superset with curls to save time.",
     guide: "Sit on the bench or stand. Cup one end of a single dumbbell with both palms and raise it overhead until arms are fully extended. Keep elbows close to your ears and stationary. Slowly lower the dumbbell behind your head by bending at the elbows until your forearms touch your biceps or you feel a deep stretch. Press back up by straightening your elbows. Keep your core engaged to avoid arching your back."
   }
@@ -894,6 +849,9 @@ function migrateExerciseRenames(st) {
     "Lat Pulldown Machine", "Cable Face Pulls", "Tricep Pushdowns (Cable)",
     "Band Tricep Pushdowns", "Leg Curl Machine", "Cable Chest Flyes"
   ];
+  // One-time cleanup: previous migration renamed gym exercises to home
+  // replacements, carrying over wrong weights. Only purge from PAST weeks
+  // to preserve any current-week data the user already logged.
   const homeGymPurge = [
     "Dumbbell Bulgarian Split Squats", "Band Woodchops", "Band Seated Row",
     "Band Lat Pulldown", "Band Face Pulls", "Dumbbell Skull Crushers",
@@ -908,8 +866,7 @@ function migrateExerciseRenames(st) {
     "Dumbbell Lateral Raises", "Dumbbell Shrugs",
     "Band Woodchops", "Band Lat Pulldown", "Band Face Pulls",
     "Band Chest Flyes", "Dumbbell Skull Crushers",
-    "Dumbbell Bulgarian Split Squats",
-    "Band-Assisted Neutral Grip Pull-Ups"
+    "Dumbbell Bulgarian Split Squats", "Band-Assisted Neutral Grip Pull-Ups"
   ];
   if (!st || !st.logs) return st;
   const needsHomeGymClean = !st._homeGymMigrated;
@@ -1092,21 +1049,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ========== PHASE & ADJUSTMENT LOGIC ==========
-function getPhase(week) {
-  for (const p of PHASES) {
-    if (p.weeks.includes(week)) return p;
-  }
-  return PHASES[PHASES.length - 1];
-}
-
-function getPhaseIndex(week) {
-  return Math.min(Math.ceil(week / 4), 4);
-}
-
+// ========== ADJUSTMENT LOGIC ==========
 function getActiveDays(week) {
-  const phase = getPhase(week);
-  return phase.days || ["A","B","C"];
+  return ["A","B","C"];
 }
 
 function adjustReps(baseRx, lowShift, highShift, minRep) {
@@ -1228,10 +1173,7 @@ function getExerciseAdjustment(dayKey, week, exerciseName, baseRx, exInputType) 
 function renderWorkouts() {
   const container = document.getElementById("tab-workouts");
   const week = state.currentWeek;
-  const phase = getPhase(week);
-  const phaseIdx = getPhaseIndex(week);
 
-  // Day sub-tabs
   const dayLabels = { A: "Monday — Full Body", B: "Wednesday — Full Body", C: "Friday — Full Body" };
   const dayShort = { A: "Mon", B: "Wed", C: "Fri" };
   let html = `
@@ -1239,12 +1181,8 @@ function renderWorkouts() {
       <button class="week-nav-btn" onclick="changeWeek(-1)" ${week <= 1 ? 'disabled' : ''}>&#8592; Prev</button>
       <div>
         <h2>Week ${week}</h2>
-        <div style="font-size:13px;color:var(--text-muted);text-align:center;">${phase.name} Phase</div>
       </div>
       <button class="week-nav-btn" onclick="changeWeek(1)" ${week >= 16 ? 'disabled' : ''}>Next &#8594;</button>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin-bottom:16px;font-size:13px;color:var(--text-muted);">
-      <strong style="color:var(--text);">${phase.name} Phase:</strong> ${phase.description}
     </div>
     <div class="day-tabs">
   `;
@@ -1313,7 +1251,7 @@ function renderWorkouts() {
     </tr></thead><tbody>`;
 
   for (const ex of day.exercises) {
-    const rx = ex.phases[phaseIdx];
+    const rx = ex.rx;
     const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
 
     const iType = ex.inputType || "weighted";
@@ -1379,7 +1317,7 @@ function renderWorkouts() {
   // Mobile: card layout
   html += `<div class="exercise-cards open">`;
   for (const ex of day.exercises) {
-    const rx = ex.phases[phaseIdx];
+    const rx = ex.rx;
     const savedSets = log.sets && log.sets[ex.name] ? log.sets[ex.name] : [];
     const iTypeMobile = ex.inputType || "weighted";
 
@@ -1592,9 +1530,8 @@ function saveAllSets(logKey, dayKey) {
   if (!state.logs[logKey].sets) state.logs[logKey].sets = {};
   state.logs[logKey].date = new Date().toISOString().split('T')[0];
 
-  const phaseIdx = getPhaseIndex(state.currentWeek);
   for (const ex of day.exercises) {
-    const rx = ex.phases[phaseIdx];
+    const rx = ex.rx;
     const iType = ex.inputType || "weighted";
     if (!state.logs[logKey].sets[ex.name]) state.logs[logKey].sets[ex.name] = [];
     const sets = state.logs[logKey].sets[ex.name];
@@ -1820,26 +1757,6 @@ function renderProgress() {
     }
   }
   document.getElementById("currentStreak").textContent = streak;
-
-  const phase = getPhase(state.currentWeek);
-  document.getElementById("currentPhase").textContent = phase.name;
-  document.getElementById("phaseWeeks").textContent = `Weeks ${phase.weeks[0]}-${phase.weeks[phase.weeks.length-1]}`;
-
-  // Phase bars
-  for (let p = 1; p <= 4; p++) {
-    const bar = document.getElementById(`phase${p}Bar`);
-    const phaseWeeks = PHASES[p-1].weeks;
-    let phaseDone = 0;
-    let phaseTotal = 0;
-    for (const w of phaseWeeks) {
-      const weekDays = getActiveDays(w);
-      phaseTotal += weekDays.length;
-      for (const d of weekDays) {
-        if (isDayComplete(`W${w}-${d}`, d)) phaseDone++;
-      }
-    }
-    bar.style.width = `${Math.round((phaseDone / phaseTotal) * 100)}%`;
-  }
 
   // History list
   const historyEl = document.getElementById("historyList");
