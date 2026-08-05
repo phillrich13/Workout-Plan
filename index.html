@@ -1102,7 +1102,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // ========== ADJUSTMENT LOGIC ==========
 function getActiveDays(week) {
-  return ["A","B","C"];
+  return week <= 4 ? ["A","C"] : ["A","B","C"];
 }
 
 function adjustReps(baseRx, lowShift, highShift, minRep) {
